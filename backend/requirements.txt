@@ -1,0 +1,5 @@
+Flask==3.0.3
+flask-cors==4.0.1
+reportlab==4.2.2
+yagmail==0.15.293
+python-dotenv==1.0.1

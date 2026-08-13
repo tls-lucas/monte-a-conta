@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Monte a Conta",
+    "slug": "monte-a-conta",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#fdf6ec"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
