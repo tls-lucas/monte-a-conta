@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import Peca, { TAMANHO_PECA } from './src/components/Peca';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
+import TrilhaFases from './src/components/TrilhaFases';
 import { gerarFase } from './src/utils/faseGenerator';
 import { contaEstaCorreta } from './src/utils/validador';
 import { registrarTempo, carregarEstatisticas, calcularResumo, limparEstatisticas } from './src/utils/estatisticas';
@@ -56,6 +57,9 @@ export default function App() {
   const [painelAberto, setPainelAberto] = useState(false);
   const [resolvido, setResolvido] = useState(false);
 
+  // 'menu' = trilha de seleção de fases, 'jogo' = tela do jogo em si
+  const [tela, setTela] = useState('menu');
+
   const janela = Dimensions.get('window');
   const [areaJogo, setAreaJogo] = useState({ w: janela.width, h: janela.height - 190 });
 
@@ -80,10 +84,12 @@ export default function App() {
   // --- Estatísticas (tempo médio por operação e por nível de dígitos, salvas em JSON) ---
   const [painelEstatisticasAberto, setPainelEstatisticasAberto] = useState(false);
   const [resumoEstatisticas, setResumoEstatisticas] = useState(null);
+  const [estatisticasBrutas, setEstatisticasBrutas] = useState(null);
 
   async function atualizarResumoEstatisticas() {
     const dados = await carregarEstatisticas();
     setResumoEstatisticas(calcularResumo(dados));
+    setEstatisticasBrutas(dados);
   }
 
   useEffect(() => {
@@ -238,16 +244,58 @@ export default function App() {
     gerarNovaFaseComConfigAtual(config);
   }
 
+  function selecionarFaseNaTrilha(operacao, nivel) {
+    const novaConfig = { operacoes: [operacao], maxDigitos: nivel };
+    setConfig(novaConfig);
+    gerarNovaFaseComConfigAtual(novaConfig);
+    setTela('jogo');
+  }
+
   const limites = {
     maxX: Math.max(0, areaJogo.w - TAMANHO_PECA),
     maxY: Math.max(0, areaJogo.h - TAMANHO_PECA),
   };
 
+  if (tela === 'menu') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={styles.cabecalho}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.titulo}>🧩 Monte a conta</Text>
+            <Text style={styles.subtitulo}>Escolha uma fase pra jogar</Text>
+          </View>
+          <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelEstatisticasAberto(true)}>
+            <Text style={styles.botaoIconeTexto}>📊</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TrilhaFases
+          estatisticas={estatisticasBrutas}
+          onSelecionarFase={selecionarFaseNaTrilha}
+        />
+
+        <PainelEstatisticas
+          visivel={painelEstatisticasAberto}
+          resumo={resumoEstatisticas}
+          onFechar={() => setPainelEstatisticasAberto(false)}
+          onLimpar={async () => {
+            await limparEstatisticas();
+            atualizarResumoEstatisticas();
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.cabecalho}>
-        <View style={{ flex: 1 }}>
+        <TouchableOpacity style={styles.botaoIcone} onPress={() => setTela('menu')}>
+          <Text style={styles.botaoIconeTexto}>🗺️</Text>
+        </TouchableOpacity>
+        <View style={{ flex: 1, marginLeft: 8 }}>
           <Text style={styles.titulo}>🧩 Monte a conta</Text>
           <Text style={styles.subtitulo}>Arraste os blocos e alinhe a conta em fila</Text>
         </View>
