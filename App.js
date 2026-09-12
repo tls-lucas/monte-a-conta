@@ -13,6 +13,10 @@ import Peca, { TAMANHO_PECA } from './src/components/Peca';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
 import TrilhaFases from './src/components/TrilhaFases';
+import FaseDinheiro from './src/components/FaseDinheiro';
+import FaseContagem from './src/components/FaseContagem';
+import PainelAparencia from './src/components/PainelAparencia';
+import { AparenciaProvider, useAparencia } from './src/contexto/AparenciaContext';
 import { gerarFase } from './src/utils/faseGenerator';
 import { contaEstaCorreta } from './src/utils/validador';
 import { registrarTempo, carregarEstatisticas, calcularResumo, limparEstatisticas } from './src/utils/estatisticas';
@@ -49,12 +53,14 @@ function formatarTempo(segundosTotais) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function App() {
+function AppInterno() {
+  const { palco: coresPalco } = useAparencia();
   const [config, setConfig] = useState({
     operacoes: ['soma'],
     maxDigitos: 1,
   });
   const [painelAberto, setPainelAberto] = useState(false);
+  const [painelAparenciaAberto, setPainelAparenciaAberto] = useState(false);
   const [resolvido, setResolvido] = useState(false);
 
   // 'menu' = trilha de seleção de fases, 'jogo' = tela do jogo em si
@@ -256,6 +262,14 @@ export default function App() {
     maxY: Math.max(0, areaJogo.h - TAMANHO_PECA),
   };
 
+  if (tela === 'dinheiro') {
+    return <FaseDinheiro onVoltar={() => setTela('menu')} onConcluida={atualizarResumoEstatisticas} />;
+  }
+
+  if (tela === 'contagem') {
+    return <FaseContagem onVoltar={() => setTela('menu')} onConcluida={atualizarResumoEstatisticas} />;
+  }
+
   if (tela === 'menu') {
     return (
       <SafeAreaView style={styles.container}>
@@ -268,11 +282,27 @@ export default function App() {
           <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelEstatisticasAberto(true)}>
             <Text style={styles.botaoIconeTexto}>📊</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelAparenciaAberto(true)}>
+            <Text style={styles.botaoIconeTexto}>🎨</Text>
+          </TouchableOpacity>
         </View>
 
         <TrilhaFases
           estatisticas={estatisticasBrutas}
           onSelecionarFase={selecionarFaseNaTrilha}
+        />
+
+        <TouchableOpacity style={styles.botaoFaseDinheiro} onPress={() => setTela('dinheiro')}>
+          <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.botaoFaseContagem} onPress={() => setTela('contagem')}>
+          <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
+        </TouchableOpacity>
+
+        <PainelAparencia
+          visivel={painelAparenciaAberto}
+          onFechar={() => setPainelAparenciaAberto(false)}
         />
 
         <PainelEstatisticas
@@ -314,7 +344,7 @@ export default function App() {
       </View>
 
       <View
-        style={styles.palco}
+        style={[styles.palco, { backgroundColor: coresPalco.fundo }]}
         onLayout={(e) => {
           setAreaJogo({
             w: e.nativeEvent.layout.width,
@@ -342,14 +372,23 @@ export default function App() {
 
         {emConfirmacao && !resolvido && (
           <View style={styles.confirmacaoBox} pointerEvents="none">
-            <Text style={styles.confirmacaoTexto}>Confirmando... {contagem}</Text>
+            <Text
+              style={[
+                styles.confirmacaoTexto,
+                { backgroundColor: coresPalco.caixaFlutuante },
+              ]}
+            >
+              Confirmando... {contagem}
+            </Text>
           </View>
         )}
 
         {resolvido && (
           <View style={styles.mensagemBox} pointerEvents="box-none">
             <Text style={styles.mensagem}>🎉 Parabéns! Conta certa!</Text>
-            <Text style={styles.mensagemTempo}>Seu tempo: {formatarTempo(tempoFinal ?? segundos)}</Text>
+            <Text style={[styles.mensagemTempo, { color: coresPalco.textoCaixa }]}>
+              Seu tempo: {formatarTempo(tempoFinal ?? segundos)}
+            </Text>
             <TouchableOpacity
               style={styles.botaoNovaFase}
               onPress={() => gerarNovaFaseComConfigAtual(config)}
@@ -427,6 +466,27 @@ const styles = StyleSheet.create({
   botaoIconeTexto: {
     fontSize: 18,
   },
+  botaoFaseDinheiro: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: '#2e7dd1',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  botaoFaseContagem: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: '#6fc270',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  botaoFaseDinheiroTexto: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
   palco: {
     flex: 1,
     position: 'relative',
@@ -450,7 +510,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#f2a154',
-    backgroundColor: '#fff',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 10,
@@ -486,3 +545,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export default function App() {
+  return (
+    <AparenciaProvider>
+      <AppInterno />
+    </AparenciaProvider>
+  );
+}

@@ -1,10 +1,13 @@
 import React, { useRef, useReducer, useEffect } from 'react';
 import { Animated, PanResponder, Platform, StyleSheet, Text } from 'react-native';
+import { useAparencia } from '../contexto/AparenciaContext';
 
-const CORES = {
+// cores padrão, usadas como último recurso caso o context não esteja disponível
+const CORES_PADRAO = {
   numero: '#4d9de0',
   operador: '#f2a154',
   igual: '#6fc270',
+  emoji: '#fdf1de',
 };
 
 export const TAMANHO_PECA = 60;
@@ -14,7 +17,30 @@ function clamp(valor, min, max) {
   return Math.max(min, Math.min(max, valor));
 }
 
-export default function Peca({ id, tipo, valor, posInicial, limites, alinhada, celebrando, bloqueada, onMove, onRelease }) {
+export default function Peca({
+  id,
+  tipo,
+  valor,
+  posInicial,
+  limites,
+  alinhada,
+  celebrando,
+  bloqueada,
+  onMove,
+  onRelease,
+  largura = TAMANHO_PECA,
+  altura = TAMANHO_PECA,
+  corPersonalizada,
+  tamanhoFonte = 26,
+}) {
+  const { escala: escalaTamanho, cores } = useAparencia();
+  const larguraFinal = largura * escalaTamanho;
+  const alturaFinal = altura * escalaTamanho;
+  const fonteFinal = tamanhoFonte * escalaTamanho;
+  // corPersonalizada (usada pela fase de dinheiro) sempre tem prioridade —
+  // a fase de dinheiro não participa do esquema de cores configurável
+  const corFundo = corPersonalizada || cores[tipo] || CORES_PADRAO[tipo];
+
   // posição real do bloco vive numa ref (fonte da verdade), não em Animated.Value —
   // evita ler propriedades internas (_value/_offset) que podem virar NaN e "sumir" o bloco.
   const posRef = useRef({ x: posInicial.x, y: posInicial.y });
@@ -23,7 +49,7 @@ export default function Peca({ id, tipo, valor, posInicial, limites, alinhada, c
   const arrastandoRef = useRef(false);
   const [, forcarRender] = useReducer((n) => n + 1, 0);
 
-  const escala = useRef(new Animated.Value(1)).current;
+  const escalaAnimada = useRef(new Animated.Value(1)).current;
 
   function aplicarPosicao(dx, dy) {
     let novoX = inicioRef.current.x + dx;
@@ -92,8 +118,8 @@ export default function Peca({ id, tipo, valor, posInicial, limites, alinhada, c
   useEffect(() => {
     if (celebrando) {
       Animated.sequence([
-        Animated.timing(escala, { toValue: 1.18, duration: 180, useNativeDriver: true }),
-        Animated.timing(escala, { toValue: 1, duration: 220, useNativeDriver: true }),
+        Animated.timing(escalaAnimada, { toValue: 1.18, duration: 180, useNativeDriver: true }),
+        Animated.timing(escalaAnimada, { toValue: 1, duration: 220, useNativeDriver: true }),
       ]).start();
     }
   }, [celebrando]);
@@ -104,16 +130,18 @@ export default function Peca({ id, tipo, valor, posInicial, limites, alinhada, c
       style={[
         styles.peca,
         {
-          backgroundColor: CORES[tipo],
+          width: larguraFinal,
+          height: alturaFinal,
+          backgroundColor: corFundo,
           left: posRef.current.x,
           top: posRef.current.y,
-          transform: [{ scale: escala }],
+          transform: [{ scale: escalaAnimada }],
           borderColor: alinhada ? '#2e8b2e' : 'transparent',
           opacity: bloqueada ? 0.85 : 1,
         },
       ]}
     >
-      <Text style={styles.texto} selectable={false}>
+      <Text style={[styles.texto, { fontSize: fonteFinal }]} selectable={false}>
         {valor}
       </Text>
     </Animated.View>
@@ -134,8 +162,6 @@ const semInterferenciaWeb = Platform.select({
 
 const styles = StyleSheet.create({
   peca: {
-    width: TAMANHO_PECA,
-    height: TAMANHO_PECA,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -150,7 +176,6 @@ const styles = StyleSheet.create({
   },
   texto: {
     color: '#fff',
-    fontSize: 26,
     fontWeight: 'bold',
     ...semInterferenciaWeb,
   },
