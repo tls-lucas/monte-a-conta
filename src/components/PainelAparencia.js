@@ -75,13 +75,11 @@ export default function PainelAparencia({ visivel, onFechar }) {
     esquemaCores,
     corPrincipalMonocromatica,
     coresPersonalizadas,
-    quantidadeMaxDigitosContaAritmetica,
     definirTema,
     definirTamanho,
     definirEsquemaCores,
     definirCorPrincipalMonocromatica,
     definirCoresPersonalizadas,
-    definirQuantidadeMaxDigitosContaAritmetica,
     interface: coresInterface,
   } = useAparencia();
 
@@ -108,27 +106,6 @@ export default function PainelAparencia({ visivel, onFechar }) {
             <View style={styles.secao}>
               <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Tamanho dos blocos</Text>
               <TamanhoSlider valorAtual={tamanho} aoMudar={definirTamanho} />
-            </View>
-
-            <View style={styles.secao}>
-              <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Dígitos máximos (Conta)</Text>
-              <View style={styles.controleDigitos}>
-                <TouchableOpacity
-                  style={[styles.botaoDigito, { backgroundColor: coresInterface.botaoIconeFundo }]}
-                  onPress={() => definirQuantidadeMaxDigitosContaAritmetica(Math.max(1, quantidadeMaxDigitosContaAritmetica - 1))}
-                >
-                  <Text style={styles.botaoDigitoTexto}>−</Text>
-                </TouchableOpacity>
-                <Text style={[styles.digitoValor, { color: coresInterface.textoPrincipal }]}>
-                  {quantidadeMaxDigitosContaAritmetica}
-                </Text>
-                <TouchableOpacity
-                  style={[styles.botaoDigito, { backgroundColor: coresInterface.botaoIconeFundo }]}
-                  onPress={() => definirQuantidadeMaxDigitosContaAritmetica(Math.min(6, quantidadeMaxDigitosContaAritmetica + 1))}
-                >
-                  <Text style={styles.botaoDigitoTexto}>+</Text>
-                </TouchableOpacity>
-              </View>
             </View>
 
             <LinhaOpcoes
@@ -229,28 +206,4 @@ const styles = StyleSheet.create({
   opcaoTexto: { fontSize: 13, fontWeight: '600', color: '#5b4636' },
   opcaoTextoSelecionado: { color: '#fff' },
   aviso: { fontSize: 12, color: '#8a7a66', fontStyle: 'italic', marginTop: -8 },
-  controleDigitos: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  botaoDigito: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  botaoDigitoTexto: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  digitoValor: {
-    fontSize: 20,
-    fontWeight: '700',
-    minWidth: 40,
-    textAlign: 'center',
-  },
 });
