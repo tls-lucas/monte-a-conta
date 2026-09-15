@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { useAparencia } from '../contexto/AparenciaContext';
 import { OPERACOES_DISPONIVEIS } from '../utils/faseGenerator';
 import { NIVEIS_LISTA } from '../utils/estatisticas';
 import { carregarUltimoEmailRelatorio, enviarRelatorioPorEmail } from '../services/relatorio';
@@ -13,6 +14,7 @@ function formatarTempo(segundos) {
 }
 
 export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar }) {
+  const { interface: coresInterface } = useAparencia();
   const [email, setEmail] = useState('');
   const [enviando, setEnviando] = useState(false);
 
@@ -49,21 +51,21 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
   return (
     <Modal visible={visivel} transparent animationType="slide" onRequestClose={onFechar}>
       <Pressable style={styles.fundo} onPress={onFechar}>
-        <Pressable style={styles.painel} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.titulo}>📊 Estatísticas (tempo médio)</Text>
+        <Pressable style={[styles.painel, { backgroundColor: coresInterface.fundoTela }]} onPress={(e) => e.stopPropagation()}>
+          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>📊 Estatísticas (tempo médio)</Text>
 
           <ScrollView style={{ maxHeight: 420 }}>
             {OPERACOES_DISPONIVEIS.map((op) => {
               const geral = resumo?.porOperacao?.[op.chave];
               return (
-                <View key={op.chave} style={styles.blocoOperacao}>
+                <View key={op.chave} style={[styles.blocoOperacao, { backgroundColor: coresInterface.fundoCaixa }]}>
                   <View style={styles.linhaGeral}>
-                    <Text style={styles.nomeOperacao}>
+                    <Text style={[styles.nomeOperacao, { color: coresInterface.textoPrincipal }]}>
                       {op.simbolo} {op.rotulo}
                     </Text>
                     <Text style={styles.mediaGeral}>
                       {formatarTempo(geral?.media)}{' '}
-                      <Text style={styles.quantidade}>({geral?.quantidade || 0})</Text>
+                      <Text style={[styles.quantidade, { color: coresInterface.textoSecundario }]}>({geral?.quantidade || 0})</Text>
                     </Text>
                   </View>
 
@@ -71,10 +73,10 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
                     {NIVEIS_LISTA.map((n) => {
                       const cat = resumo?.porCategoria?.[op.chave]?.[n];
                       return (
-                        <View key={n} style={styles.chipNivel}>
-                          <Text style={styles.chipNivelTitulo}>{n} díg.</Text>
-                          <Text style={styles.chipNivelMedia}>{formatarTempo(cat?.media)}</Text>
-                          <Text style={styles.chipNivelQtd}>{cat?.quantidade || 0}x</Text>
+                        <View key={n} style={[styles.chipNivel, { backgroundColor: coresInterface.fundoTemaBox }]}>
+                          <Text style={[styles.chipNivelTitulo, { color: coresInterface.textoSecundario }]}>{n} díg.</Text>
+                          <Text style={[styles.chipNivelMedia, { color: coresInterface.textoPrincipal }]}>{formatarTempo(cat?.media)}</Text>
+                          <Text style={[styles.chipNivelQtd, { color: coresInterface.textoSecundario }]}>{cat?.quantidade || 0}x</Text>
                         </View>
                       );
                     })}
@@ -83,9 +85,9 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
               );
             })}
 
-            <View style={styles.areaEnvio}>
-              <Text style={styles.tituloEnvio}>📧 Enviar relatório em PDF</Text>
-              <Text style={styles.descricaoEnvio}>
+            <View style={[styles.areaEnvio, { backgroundColor: coresInterface.fundoCaixa }]}>
+              <Text style={[styles.tituloEnvio, { color: coresInterface.textoPrincipal }]}>📧 Enviar relatório em PDF</Text>
+              <Text style={[styles.descricaoEnvio, { color: coresInterface.textoSecundario }]}>
                 Digite o e-mail do destinatário. O último endereço usado fica salvo neste dispositivo.
               </Text>
               <TextInput
@@ -96,7 +98,8 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!enviando}
-                style={styles.inputEmail}
+                style={[styles.inputEmail, { backgroundColor: coresInterface.fundoTemaBox, color: coresInterface.textoPrincipal }]}
+                placeholderTextColor={coresInterface.textoSecundario}
               />
               <TouchableOpacity
                 style={[styles.botaoEnviar, enviando && styles.botaoDesabilitado]}
@@ -119,7 +122,7 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
             <Text style={styles.botaoLimparTexto}>Limpar histórico</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.botaoSecundario} onPress={onFechar}>
+          <TouchableOpacity style={[styles.botaoSecundario, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onFechar}>
             <Text style={styles.botaoSecundarioTexto}>Fechar</Text>
           </TouchableOpacity>
         </Pressable>

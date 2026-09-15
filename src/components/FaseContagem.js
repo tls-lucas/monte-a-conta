@@ -12,6 +12,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-na
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
 import Peca, { TAMANHO_PECA } from './Peca';
+import PainelAparencia from './PainelAparencia';
 import { gerarFaseContagem } from '../utils/contagemGenerator';
 import {
   contagemComOperadorEstaCorreta,
@@ -63,8 +64,9 @@ const SIMBOLO_OPERACAO = {
 };
 
 export default function FaseContagem({ onVoltar, onConcluida }) {
-  const { palco: coresPalco } = useAparencia();
+  const { palco: coresPalco, interface: coresInterface } = useAparencia();
   const [areaJogo, setAreaJogo] = useState({ w: 0, h: 0 });
+  const [painelAparenciaAberto, setPainelAparenciaAberto] = useState(false);
 
   function novaFase(area) {
     const dados = gerarFaseContagem();
@@ -220,34 +222,37 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
       <StatusBar style="dark" />
-      <View style={styles.cabecalho}>
-        <TouchableOpacity style={styles.botaoIcone} onPress={onVoltar}>
+      <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onVoltar}>
           <Text style={styles.botaoIconeTexto}>🗺️</Text>
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={styles.titulo}>{fase.emoji} Contagem</Text>
-          <Text style={styles.subtitulo}>
+          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>{fase.emoji} Contagem</Text>
+          <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>
             {ROTULO_OPERACAO[fase.operacao]} · alinhe as peças em fila
           </Text>
         </View>
-        <View style={styles.timerBox}>
-          <Text style={styles.timerTexto}>⏱ {formatarTempo(segundos)}</Text>
+        <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
+          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
         </View>
-        <TouchableOpacity style={styles.botaoIcone} onPress={gerarNovaFaseAgora}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={gerarNovaFaseAgora}>
           <Text style={styles.botaoIconeTexto}>↺</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
+          <Text style={styles.botaoIconeTexto}>🎨</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.temaBox}>
-        <Text style={styles.temaTexto}>
+      <View style={[styles.temaBox, { backgroundColor: coresInterface.fundoCaixa }]}>
+        <Text style={[styles.temaTexto, { color: coresInterface.textoPrincipal }]}>
           Tema: {fase.emoji}{' '}
           <Text style={styles.temaLetraDestaque}>{fase.nomeEmoji.charAt(0)}</Text>
           {fase.nomeEmoji.slice(1)}
         </Text>
         {fase.operacao !== 'nenhuma' && (
-          <Text style={styles.temaTexto}>
+          <Text style={[styles.temaTexto, { color: coresInterface.textoPrincipal }]}>
             Conta alvo: {fase.a}
             {SIMBOLO_OPERACAO[fase.operacao]}
             {fase.b}={fase.resultado}
@@ -299,6 +304,11 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
           </View>
         )}
       </View>
+
+      <PainelAparencia
+        visivel={painelAparenciaAberto}
+        onFechar={() => setPainelAparenciaAberto(false)}
+      />
     </SafeAreaView>
   );
 }

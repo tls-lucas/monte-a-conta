@@ -1,8 +1,10 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import { useAparencia } from '../contexto/AparenciaContext';
 import { OPERACOES_DISPONIVEIS } from '../utils/faseGenerator';
 
 export default function PainelConfig({ visivel, config, onMudarConfig, onFechar, onGerarNovaFase }) {
+  const { interface: coresInterface } = useAparencia();
   function alternarOperacao(chave) {
     const jaAtiva = config.operacoes.includes(chave);
     let novasOperacoes;
@@ -23,10 +25,10 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
   return (
     <Modal visible={visivel} transparent animationType="slide" onRequestClose={onFechar}>
       <Pressable style={styles.fundo} onPress={onFechar}>
-        <Pressable style={styles.painel} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.titulo}>⚙️ Configurar fase</Text>
+        <Pressable style={[styles.painel, { backgroundColor: coresInterface.fundoTela }]} onPress={(e) => e.stopPropagation()}>
+          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>⚙️ Configurar fase</Text>
 
-          <Text style={styles.secao}>Operações permitidas</Text>
+          <Text style={[styles.secao, { color: coresInterface.textoSecundario }]}>Operações permitidas</Text>
           <View style={styles.linhaChips}>
             {OPERACOES_DISPONIVEIS.map((op) => {
               const ativa = config.operacoes.includes(op.chave);
@@ -34,9 +36,9 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
                 <TouchableOpacity
                   key={op.chave}
                   onPress={() => alternarOperacao(op.chave)}
-                  style={[styles.chip, ativa && styles.chipAtivo]}
+                  style={[styles.chip, ativa && styles.chipAtivo, { backgroundColor: ativa ? '#6fc270' : coresInterface.fundoCaixa }]}
                 >
-                  <Text style={[styles.chipTexto, ativa && styles.chipTextoAtivo]}>
+                  <Text style={[styles.chipTexto, ativa && styles.chipTextoAtivo, { color: ativa ? '#fff' : coresInterface.textoPrincipal }]}>
                     {op.simbolo} {op.rotulo}
                   </Text>
                 </TouchableOpacity>
@@ -44,15 +46,15 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
             })}
           </View>
 
-          <Text style={styles.secao}>Números com até quantos dígitos?</Text>
+          <Text style={[styles.secao, { color: coresInterface.textoSecundario }]}>Números com até quantos dígitos?</Text>
           <View style={styles.linhaChips}>
             {[1, 2, 3, 4].map((n) => (
               <TouchableOpacity
                 key={n}
                 onPress={() => definirDigitos(n)}
-                style={[styles.chipDigito, config.maxDigitos === n && styles.chipAtivo]}
+                style={[styles.chipDigito, config.maxDigitos === n && styles.chipAtivo, { backgroundColor: config.maxDigitos === n ? '#6fc270' : coresInterface.fundoCaixa }]}
               >
-                <Text style={[styles.chipTexto, config.maxDigitos === n && styles.chipTextoAtivo]}>
+                <Text style={[styles.chipTexto, config.maxDigitos === n && styles.chipTextoAtivo, { color: config.maxDigitos === n ? '#fff' : coresInterface.textoPrincipal }]}>
                   {n}
                 </Text>
               </TouchableOpacity>
@@ -64,7 +66,7 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.botaoSecundario} onPress={onFechar}>
-            <Text style={styles.botaoSecundarioTexto}>Fechar</Text>
+            <Text style={[styles.botaoSecundarioTexto, { color: coresInterface.textoSecundario }]}>Fechar</Text>
           </TouchableOpacity>
         </Pressable>
       </Pressable>

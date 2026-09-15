@@ -1,0 +1,158 @@
+{
+  ".expo/devices.json": {
+    "mtime": 1786627247.7649252,
+    "seen": 1789489761.2175589,
+    "ast_hash": "e5f6eb13c875f326cfd5915d3364614f",
+    "semantic_hash": "e5f6eb13c875f326cfd5915d3364614f"
+  },
+  "App.js": {
+    "mtime": 1788836426.6163726,
+    "seen": 1789489761.2175627,
+    "ast_hash": "014a98b46b403eb1556971ede3a3a9a7",
+    "semantic_hash": "014a98b46b403eb1556971ede3a3a9a7"
+  },
+  "app.json": {
+    "mtime": 1785865200.0,
+    "seen": 1789489761.217564,
+    "ast_hash": "ba1153f194eae2b9aba1c0e1f678e331",
+    "semantic_hash": "ba1153f194eae2b9aba1c0e1f678e331"
+  },
+  "babel.config.js": {
+    "mtime": 1785865210.0,
+    "seen": 1789489761.2175653,
+    "ast_hash": "8fc7a520543679a79421ba4e2dbcfe90",
+    "semantic_hash": "8fc7a520543679a79421ba4e2dbcfe90"
+  },
+  "backend/app.py": {
+    "mtime": 1786626831.0,
+    "seen": 1789489761.217566,
+    "ast_hash": "b32aba7759747075f4544cc51149431c",
+    "semantic_hash": "b32aba7759747075f4544cc51149431c"
+  },
+  "package.json": {
+    "mtime": 1786627313.7690032,
+    "seen": 1789489761.2175665,
+    "ast_hash": "84cda0e0f575442e156ece2282f8185a",
+    "semantic_hash": "84cda0e0f575442e156ece2282f8185a"
+  },
+  "src/components/FaseContagem.js": {
+    "mtime": 1788836422.1038141,
+    "seen": 1789489761.2175672,
+    "ast_hash": "a4ed078d81ba4b42f2c93c88e9094872",
+    "semantic_hash": "a4ed078d81ba4b42f2c93c88e9094872"
+  },
+  "src/components/FaseDinheiro.js": {
+    "mtime": 1788836422.1040998,
+    "seen": 1789489761.217568,
+    "ast_hash": "6c9c3f2d4a9ea6f15245725f0a0c00e1",
+    "semantic_hash": "6c9c3f2d4a9ea6f15245725f0a0c00e1"
+  },
+  "src/components/PainelAparencia.js": {
+    "mtime": 1788836404.4202473,
+    "seen": 1789489761.2175684,
+    "ast_hash": "4ce85cc3e32cf0cda060540496ed894f",
+    "semantic_hash": "4ce85cc3e32cf0cda060540496ed894f"
+  },
+  "src/components/PainelConfig.js": {
+    "mtime": 1785865261.0,
+    "seen": 1789489761.217569,
+    "ast_hash": "d1958db59c00e3249313b8a59a30235d",
+    "semantic_hash": "d1958db59c00e3249313b8a59a30235d"
+  },
+  "src/components/PainelEstatisticas.js": {
+    "mtime": 1786626831.0,
+    "seen": 1789489761.2175698,
+    "ast_hash": "6147f0c7474cb5bf9f648d4b258d0e6b",
+    "semantic_hash": "6147f0c7474cb5bf9f648d4b258d0e6b"
+  },
+  "src/components/Peca.js": {
+    "mtime": 1788836422.1042993,
+    "seen": 1789489761.2175705,
+    "ast_hash": "a76e2fa9b745d9a0f921b5f74c562790",
+    "semantic_hash": "a76e2fa9b745d9a0f921b5f74c562790"
+  },
+  "src/components/TrilhaFases.js": {
+    "mtime": 1786981081.5020819,
+    "seen": 1789489761.217571,
+    "ast_hash": "0c12b3099b3eeb1120162d901a2601db",
+    "semantic_hash": "0c12b3099b3eeb1120162d901a2601db"
+  },
+  "src/contexto/AparenciaContext.js": {
+    "mtime": 1788836377.7277284,
+    "seen": 1789489761.2175717,
+    "ast_hash": "fec85355e81d88ad6a9d77b47f715fc3",
+    "semantic_hash": "fec85355e81d88ad6a9d77b47f715fc3"
+  },
+  "src/services/relatorio.js": {
+    "mtime": 1786626875.0,
+    "seen": 1789489761.2175725,
+    "ast_hash": "1f113cf7e94c0312ee4728b26c0077df",
+    "semantic_hash": "1f113cf7e94c0312ee4728b26c0077df"
+  },
+  "src/utils/contagemGenerator.js": {
+    "mtime": 1788307201.9738646,
+    "seen": 1789489761.2175732,
+    "ast_hash": "d51b338e91f54df18ea4c519f28d515b",
+    "semantic_hash": "d51b338e91f54df18ea4c519f28d515b"
+  },
+  "src/utils/emojiTema.js": {
+    "mtime": 1788260201.4971657,
+    "seen": 1789489761.2175736,
+    "ast_hash": "1b551927bcffcb4187f14b8af05ffb38",
+    "semantic_hash": "1b551927bcffcb4187f14b8af05ffb38"
+  },
+  "src/utils/estatisticas.js": {
+    "mtime": 1786619967.0,
+    "seen": 1789489761.2175744,
+    "ast_hash": "401cf8501c3783c90b5a673ff5d6b7d0",
+    "semantic_hash": "401cf8501c3783c90b5a673ff5d6b7d0"
+  },
+  "src/utils/faseGenerator.js": {
+    "mtime": 1786389118.0,
+    "seen": 1789489761.2175748,
+    "ast_hash": "6c7b946dc67bc89e10d84f02931102d7",
+    "semantic_hash": "6c7b946dc67bc89e10d84f02931102d7"
+  },
+  "src/utils/notasGenerator.js": {
+    "mtime": 1787253558.4661345,
+    "seen": 1789489761.2175753,
+    "ast_hash": "95227dc7541ea84c37b2a67fe1b0b3fc",
+    "semantic_hash": "95227dc7541ea84c37b2a67fe1b0b3fc"
+  },
+  "src/utils/validador.js": {
+    "mtime": 1786120695.0,
+    "seen": 1789489761.2175763,
+    "ast_hash": "e6ae2cb877e9f2ec850b0823e0b16f2e",
+    "semantic_hash": "e6ae2cb877e9f2ec850b0823e0b16f2e"
+  },
+  "src/utils/validadorContagem.js": {
+    "mtime": 1788305646.1616228,
+    "seen": 1789489761.2175767,
+    "ast_hash": "79db143b106c40fd5facc4a9f85ea447",
+    "semantic_hash": "79db143b106c40fd5facc4a9f85ea447"
+  },
+  ".expo/README.md": {
+    "mtime": 1786627247.7599254,
+    "seen": 1789489761.2175775,
+    "ast_hash": "5b7704d0d342e4ae362671b70b5d86bc",
+    "semantic_hash": "5b7704d0d342e4ae362671b70b5d86bc"
+  },
+  "backend/requirements.txt": {
+    "mtime": 1786626831.0,
+    "seen": 1789489761.2175782,
+    "ast_hash": "6a00292660066821c0d19ec0675c8b28",
+    "semantic_hash": "6a00292660066821c0d19ec0675c8b28"
+  },
+  ".claude/settings.json": {
+    "mtime": 1789490536.295825,
+    "seen": 1789491046.3822405,
+    "ast_hash": "495bef0cdb288c1505274a7f94c21d7f",
+    "semantic_hash": "495bef0cdb288c1505274a7f94c21d7f"
+  },
+  ".claude/settings.local.json": {
+    "mtime": 1789490518.845806,
+    "seen": 1789491046.3822455,
+    "ast_hash": "495bef0cdb288c1505274a7f94c21d7f",
+    "semantic_hash": "495bef0cdb288c1505274a7f94c21d7f"
+  }
+}

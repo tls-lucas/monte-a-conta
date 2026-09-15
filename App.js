@@ -12,7 +12,6 @@ import { StatusBar } from 'expo-status-bar';
 import Peca, { TAMANHO_PECA } from './src/components/Peca';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
-import TrilhaFases from './src/components/TrilhaFases';
 import TrilhaConta from './src/components/TrilhaConta';
 import BlocoExerciciosAno from './src/components/BlocoExerciciosAno';
 import FaseDinheiro from './src/components/FaseDinheiro';
@@ -254,13 +253,6 @@ function AppInterno() {
     gerarNovaFaseComConfigAtual(config);
   }
 
-  function selecionarFaseNaTrilha(operacao, nivel) {
-    const novaConfig = { operacoes: [operacao], maxDigitos: nivel };
-    setConfig(novaConfig);
-    gerarNovaFaseComConfigAtual(novaConfig);
-    setTela('jogo');
-  }
-
   const limites = {
     maxX: Math.max(0, areaJogo.w - TAMANHO_PECA),
     maxY: Math.max(0, areaJogo.h - TAMANHO_PECA),
@@ -320,11 +312,6 @@ function AppInterno() {
             <Text style={styles.botaoIconeTexto}>🎨</Text>
           </TouchableOpacity>
         </View>
-
-        <TrilhaFases
-          estatisticas={estatisticasBrutas}
-          onSelecionarFase={selecionarFaseNaTrilha}
-        />
 
         <TouchableOpacity style={styles.botaoFaseDinheiro} onPress={() => setTela('dinheiro')}>
           <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>

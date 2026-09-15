@@ -12,6 +12,7 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } fr
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
 import Peca from './Peca';
+import PainelAparencia from './PainelAparencia';
 import { NOTAS_DISPONIVEIS, gerarValorAlvo } from '../utils/notasGenerator';
 import { registrarTempo } from '../utils/estatisticas';
 import { useAparencia } from '../contexto/AparenciaContext';
@@ -64,7 +65,7 @@ function posicaoNaBandeja(existentes, areaW, areaH) {
 }
 
 export default function FaseDinheiro({ onVoltar, onConcluida }) {
-  const { palco: coresPalco } = useAparencia();
+  const { palco: coresPalco, interface: coresInterface } = useAparencia();
   const [areaPalco, setAreaPalco] = useState({ w: 0, h: 0 });
   const [pecas, setPecas] = useState([]);
   const [dentroArea, setDentroArea] = useState({});
@@ -73,6 +74,7 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
   const [concluida, setConcluida] = useState(false);
   const [segundos, setSegundos] = useState(0);
   const [rodada, setRodada] = useState(0);
+  const [painelAparenciaAberto, setPainelAparenciaAberto] = useState(false);
 
   const posicoesAtuais = useRef({});
   const contadorId = useRef(0);
@@ -172,24 +174,27 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
       <StatusBar style="dark" />
-      <View style={styles.cabecalho}>
-        <TouchableOpacity style={styles.botaoIcone} onPress={onVoltar}>
+      <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onVoltar}>
           <Text style={styles.botaoIconeTexto}>🗺️</Text>
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={styles.titulo}>💰 Monte o valor</Text>
-          <Text style={styles.subtitulo}>Some cédulas até bater o valor-alvo</Text>
+          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>💰 Monte o valor</Text>
+          <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Some cédulas até bater o valor-alvo</Text>
         </View>
-        <View style={styles.timerBox}>
-          <Text style={styles.timerTexto}>⏱ {formatarTempo(segundos)}</Text>
+        <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
+          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
         </View>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
+          <Text style={styles.botaoIconeTexto}>🎨</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTexto}>Valor-alvo: R$ {valorAlvo}</Text>
-        <Text style={styles.infoTexto}>Valor atual: R$ {valorAtual}</Text>
+      <View style={[styles.infoBox, { backgroundColor: coresInterface.fundoCaixa }]}>
+        <Text style={[styles.infoTexto, { color: coresInterface.textoPrincipal }]}>Valor-alvo: R$ {valorAlvo}</Text>
+        <Text style={[styles.infoTexto, { color: coresInterface.textoPrincipal }]}>Valor atual: R$ {valorAtual}</Text>
         <Text style={[styles.infoStatus, concluida && styles.infoStatusOk]}>
           {concluida ? 'Fase concluída!' : 'Incompleta'}
         </Text>
@@ -245,7 +250,7 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
         horizontal
         contentContainerStyle={styles.botoesContainer}
         showsHorizontalScrollIndicator={false}
-        style={styles.botoesScroll}
+        style={[styles.botoesScroll, { borderTopColor: coresInterface.timerBoxFundo }]}
       >
         {NOTAS_DISPONIVEIS.map((valor) => (
           <TouchableOpacity
@@ -257,6 +262,11 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      <PainelAparencia
+        visivel={painelAparenciaAberto}
+        onFechar={() => setPainelAparenciaAberto(false)}
+      />
     </SafeAreaView>
   );
 }
