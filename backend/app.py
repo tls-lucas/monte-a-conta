@@ -176,14 +176,15 @@ def gerar_pdf(resumo, cores=None):
     def media_de(dados):
         return float((dados or {}).get("media", 0) or 0)
 
+    # As fases de dinheiro e de contagem são contabilizadas à parte: elas medem
+    # outra habilidade e entrariam distorcendo a média das contas.
     total_contas = sum(quantidade_de(por_operacao.get(op)) for op, _, _ in OPERACOES)
-    total_modos = sum(quantidade_de(por_modo.get(chave)) for chave, _ in MODOS)
-    total = total_contas + total_modos
-
-    soma_tempos = sum(
+    soma_contas = sum(
         media_de(por_operacao.get(op)) * quantidade_de(por_operacao.get(op)) for op, _, _ in OPERACOES
-    ) + sum(media_de(por_modo.get(chave)) * quantidade_de(por_modo.get(chave)) for chave, _ in MODOS)
-    media_geral = soma_tempos / total if total else None
+    )
+    media_contas = soma_contas / total_contas if total_contas else None
+
+    total_modos = sum(quantidade_de(por_modo.get(chave)) for chave, _ in MODOS)
 
     elementos = [
         Paragraph("Monte a Conta", titulo),
@@ -197,8 +198,9 @@ def gerar_pdf(resumo, cores=None):
     resumo_tabela = Table(
         [
             ["Indicador", "Resultado"],
-            ["Total de fases concluídas", str(total)],
-            ["Média geral", formatar_tempo(media_geral)],
+            ["Contas concluídas", str(total_contas)],
+            ["Média das contas", formatar_tempo(media_contas)],
+            ["Fases de dinheiro e contagem", str(total_modos)],
         ],
         colWidths=[10 * cm, 7 * cm],
     )
@@ -278,7 +280,7 @@ def gerar_pdf(resumo, cores=None):
 
     elementos.append(Paragraph(
         "Os tempos são apresentados como médias por operação e nível de dígitos, usando os dados persistidos localmente pelo jogo. "
-        "As fases de dinheiro e de contagem não se dividem por nº de algarismos e aparecem na tabela acima.",
+        "As fases de dinheiro e de contagem têm médias próprias e não entram no cálculo da média das contas, por medirem outra habilidade.",
         styles["Normal"],
     ))
 
