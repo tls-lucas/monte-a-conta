@@ -7,14 +7,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { useAparencia, misturarCores } from '../contexto/AparenciaContext';
-
-const ANOS = [
-  { ano: 1, titulo: '1º Ano', descricao: 'Adição e subtração (até 99)' },
-  { ano: 2, titulo: '2º Ano', descricao: 'Tabuada e reagrupamento (até 999)' },
-  { ano: 3, titulo: '3º Ano', descricao: 'Multiplicação e divisão (até 9.999)' },
-  { ano: 4, titulo: '4º Ano', descricao: 'Operações complexas (até 99.999)' },
-  { ano: 5, titulo: '5º Ano', descricao: 'Desafio máximo (até 999.999)' },
-];
+import { ANOS } from '../utils/anosEscolares';
 
 function obterStatusAno(estatisticas, ano) {
   const dados = estatisticas?.[`conta_ano_${ano}`];

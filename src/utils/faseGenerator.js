@@ -86,13 +86,13 @@ function blocosDoNumero(numero, prefixoId) {
  * Gera uma nova fase.
  * @param {Object} config
  * @param {string[]} config.operacoes
- * @param {number} config.maxDigitos - de 1 a 4
+ * @param {number} config.maxDigitos - de 1 a 6
  * @returns {{ pecas: {id:string, tipo:string, valor:string}[], sequenciaCorreta: string[], operacao: string, maxDigitos: number }}
  */
 export function gerarFase(config) {
   const operacoesValidas =
     config.operacoes && config.operacoes.length > 0 ? config.operacoes : ['soma'];
-  const maxDigitos = Math.min(4, Math.max(1, config.maxDigitos || 1));
+  const maxDigitos = Math.min(6, Math.max(1, config.maxDigitos || 1));
 
   const opEscolhida =
     operacoesValidas[Math.floor(Math.random() * operacoesValidas.length)];
