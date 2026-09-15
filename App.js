@@ -13,6 +13,7 @@ import Peca, { TAMANHO_PECA } from './src/components/Peca';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
 import TrilhaFases from './src/components/TrilhaFases';
+import TrilhaAnos from './src/components/TrilhaAnos';
 import FaseDinheiro from './src/components/FaseDinheiro';
 import FaseContagem from './src/components/FaseContagem';
 import PainelAparencia from './src/components/PainelAparencia';
@@ -22,9 +23,17 @@ import { contaEstaCorreta } from './src/utils/validador';
 import { registrarTempo, carregarEstatisticas, calcularResumo, limparEstatisticas } from './src/utils/estatisticas';
 import { API_URL } from './src/services/relatorio';
 
-const TOLERANCIA_Y = 30; // diferença máxima de altura (centro) entre os blocos, em px
-const GAP_MAXIMO = 55; // distância máxima entre bordas de blocos vizinhos, em px
-const SEGUNDOS_CONFIRMACAO = 3; // tempo que o alinhamento precisa se manter pra confirmar o acerto
+const TOLERANCIA_Y = 30;
+const GAP_MAXIMO = 55;
+const SEGUNDOS_CONFIRMACAO = 3;
+
+const CONFIGURACAO_ANOS = {
+  1: { operacoes: ['soma', 'subtracao'], maxDigitos: 1 },
+  2: { operacoes: ['soma', 'subtracao'], maxDigitos: 2 },
+  3: { operacoes: ['soma', 'subtracao', 'multiplicacao'], maxDigitos: 2 },
+  4: { operacoes: ['soma', 'subtracao', 'multiplicacao', 'divisao'], maxDigitos: 3 },
+  5: { operacoes: ['soma', 'subtracao', 'multiplicacao', 'divisao'], maxDigitos: 6 },
+};
 
 function posicaoAleatoriaSemSobrepor(existentes, areaW, areaH) {
   const margem = 16;
@@ -54,13 +63,14 @@ function formatarTempo(segundosTotais) {
 }
 
 function AppInterno() {
-  const { palco: coresPalco } = useAparencia();
+  const { palco: coresPalco, interface: coresInterface } = useAparencia();
   const [config, setConfig] = useState({
     operacoes: ['soma'],
     maxDigitos: 1,
   });
   const [painelAberto, setPainelAberto] = useState(false);
   const [painelAparenciaAberto, setPainelAparenciaAberto] = useState(false);
+  const [painelAparenciaJogoAberto, setPainelAparenciaJogoAberto] = useState(false);
   const [resolvido, setResolvido] = useState(false);
 
   // 'menu' = trilha de seleção de fases, 'jogo' = tela do jogo em si
@@ -270,19 +280,31 @@ function AppInterno() {
     return <FaseContagem onVoltar={() => setTela('menu')} onConcluida={atualizarResumoEstatisticas} />;
   }
 
+  if (tela === 'trilhaAnos') {
+    return (
+      <TrilhaAnos
+        onSelecionarAno={(ano) => {
+          setConfig(CONFIGURACAO_ANOS[ano]);
+          setTela('jogo');
+        }}
+        onVoltar={() => setTela('menu')}
+      />
+    );
+  }
+
   if (tela === 'menu') {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
         <StatusBar style="dark" />
-        <View style={styles.cabecalho}>
+        <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.titulo}>🧩 Monte a conta</Text>
-            <Text style={styles.subtitulo}>Escolha uma fase pra jogar</Text>
+            <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧩 Monte a conta</Text>
+            <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Escolha uma fase pra jogar</Text>
           </View>
-          <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelEstatisticasAberto(true)}>
+          <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelEstatisticasAberto(true)}>
             <Text style={styles.botaoIconeTexto}>📊</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelAparenciaAberto(true)}>
+          <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
             <Text style={styles.botaoIconeTexto}>🎨</Text>
           </TouchableOpacity>
         </View>
@@ -298,6 +320,10 @@ function AppInterno() {
 
         <TouchableOpacity style={styles.botaoFaseContagem} onPress={() => setTela('contagem')}>
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: '#8b5fbf' }]} onPress={() => setTela('trilhaAnos')}>
+          <Text style={styles.botaoFaseDinheiroTexto}>🧮 Conta (aritmética)</Text>
         </TouchableOpacity>
 
         <PainelAparencia
@@ -319,27 +345,30 @@ function AppInterno() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
       <StatusBar style="dark" />
-      <View style={styles.cabecalho}>
-        <TouchableOpacity style={styles.botaoIcone} onPress={() => setTela('menu')}>
+      <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setTela('menu')}>
           <Text style={styles.botaoIconeTexto}>🗺️</Text>
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={styles.titulo}>🧩 Monte a conta</Text>
-          <Text style={styles.subtitulo}>Arraste os blocos e alinhe a conta em fila</Text>
+          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧩 Monte a conta</Text>
+          <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Arraste os blocos e alinhe a conta em fila</Text>
         </View>
-        <View style={styles.timerBox}>
-          <Text style={styles.timerTexto}>⏱ {formatarTempo(segundos)}</Text>
+        <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
+          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
         </View>
-        <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelEstatisticasAberto(true)}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelEstatisticasAberto(true)}>
           <Text style={styles.botaoIconeTexto}>📊</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.botaoIcone} onPress={() => setPainelAberto(true)}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAberto(true)}>
           <Text style={styles.botaoIconeTexto}>⚙️</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.botaoIcone} onPress={reiniciarPosicoes}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={reiniciarPosicoes}>
           <Text style={styles.botaoIconeTexto}>↺</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaJogoAberto(true)}>
+          <Text style={styles.botaoIconeTexto}>🎨</Text>
         </TouchableOpacity>
       </View>
 
@@ -405,6 +434,11 @@ function AppInterno() {
         onMudarConfig={setConfig}
         onFechar={() => setPainelAberto(false)}
         onGerarNovaFase={() => gerarNovaFaseComConfigAtual(config)}
+      />
+
+      <PainelAparencia
+        visivel={painelAparenciaJogoAberto}
+        onFechar={() => setPainelAparenciaJogoAberto(false)}
       />
 
       <PainelEstatisticas
