@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { useAparencia } from '../contexto/AparenciaContext';
 import { OPERACOES_DISPONIVEIS } from '../utils/faseGenerator';
-import { NIVEIS_LISTA } from '../utils/estatisticas';
+import { NIVEIS_LISTA, MODOS_LISTA } from '../utils/estatisticas';
 import { carregarUltimoEmailRelatorio, enviarRelatorioPorEmail } from '../services/relatorio';
 
 function formatarTempo(segundos) {
@@ -85,6 +85,22 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
               );
             })}
 
+            <Text style={[styles.tituloSecao, { color: coresInterface.textoSecundario }]}>Fases sem níveis de dígitos</Text>
+            {MODOS_LISTA.map((modo) => {
+              const dados = resumo?.porModo?.[modo.chave];
+              return (
+                <View key={modo.chave} style={[styles.linhaModo, { backgroundColor: coresInterface.fundoCaixa }]}>
+                  <Text style={[styles.nomeModo, { color: coresInterface.textoPrincipal }]}>
+                    {modo.icone} {modo.rotulo}
+                  </Text>
+                  <Text style={styles.mediaGeral}>
+                    {formatarTempo(dados?.media)}{' '}
+                    <Text style={[styles.quantidade, { color: coresInterface.textoSecundario }]}>({dados?.quantidade || 0})</Text>
+                  </Text>
+                </View>
+              );
+            })}
+
             <View style={[styles.areaEnvio, { backgroundColor: coresInterface.fundoCaixa }]}>
               <Text style={[styles.tituloEnvio, { color: coresInterface.textoPrincipal }]}>📧 Enviar relatório em PDF</Text>
               <Text style={[styles.descricaoEnvio, { color: coresInterface.textoSecundario }]}>
@@ -145,7 +161,19 @@ const styles = StyleSheet.create({
   chipNivelTitulo: { fontSize: 11, color: '#8a7a66' },
   chipNivelMedia: { fontSize: 14, fontWeight: 'bold', color: '#5b4636', marginTop: 2 },
   chipNivelQtd: { fontSize: 10, color: '#8a7a66', marginTop: 1 },
-  areaEnvio: { backgroundColor: '#fff', borderRadius: 14, padding: 14, marginTop: 4, marginBottom: 8 },
+  tituloSecao: { fontSize: 13, fontWeight: '700', color: '#8a7a66', marginTop: 4, marginBottom: 6 },
+  linhaModo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 6,
+  },
+  nomeModo: { fontSize: 14, fontWeight: '600', color: '#5b4636' },
+  areaEnvio: { backgroundColor: '#fff', borderRadius: 14, padding: 14, marginTop: 10, marginBottom: 8 },
   tituloEnvio: { fontSize: 16, fontWeight: 'bold', color: '#5b4636', marginBottom: 5 },
   descricaoEnvio: { fontSize: 12, lineHeight: 17, color: '#8a7a66', marginBottom: 10 },
   inputEmail: { backgroundColor: '#fdf6ec', borderWidth: 1, borderColor: '#d8c7b3', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: '#5b4636', marginBottom: 10 },

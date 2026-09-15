@@ -24,7 +24,13 @@ OPERACOES = [
     ("multiplicacao", "×", "Multiplicação"),
     ("divisao", "÷", "Divisão"),
 ]
-NIVEIS = [1, 2, 3, 4]
+NIVEIS = [1, 2, 3, 4, 5, 6]
+
+# Modos sem divisão por nº de dígitos — vêm em resumo["porModo"].
+MODOS = [
+    ("dinheiro", "Fase de dinheiro"),
+    ("contagem", "Fase de contagem"),
+]
 
 
 def formatar_tempo(segundos):
@@ -74,13 +80,21 @@ def gerar_pdf(resumo):
 
     por_operacao = resumo.get("porOperacao", {}) if isinstance(resumo, dict) else {}
     por_categoria = resumo.get("porCategoria", {}) if isinstance(resumo, dict) else {}
+    por_modo = resumo.get("porModo", {}) if isinstance(resumo, dict) else {}
 
-    total = sum(int(por_operacao.get(op, {}).get("quantidade", 0) or 0) for op, _, _ in OPERACOES)
+    def quantidade_de(dados):
+        return int((dados or {}).get("quantidade", 0) or 0)
+
+    def media_de(dados):
+        return float((dados or {}).get("media", 0) or 0)
+
+    total_contas = sum(quantidade_de(por_operacao.get(op)) for op, _, _ in OPERACOES)
+    total_modos = sum(quantidade_de(por_modo.get(chave)) for chave, _ in MODOS)
+    total = total_contas + total_modos
+
     soma_tempos = sum(
-        float(por_operacao.get(op, {}).get("media", 0) or 0)
-        * int(por_operacao.get(op, {}).get("quantidade", 0) or 0)
-        for op, _, _ in OPERACOES
-    )
+        media_de(por_operacao.get(op)) * quantidade_de(por_operacao.get(op)) for op, _, _ in OPERACOES
+    ) + sum(media_de(por_modo.get(chave)) * quantidade_de(por_modo.get(chave)) for chave, _ in MODOS)
     media_geral = soma_tempos / total if total else None
 
     elementos = [
@@ -114,7 +128,7 @@ def gerar_pdf(resumo):
     elementos.extend([resumo_tabela, Spacer(1, 12)])
 
     elementos.append(Paragraph("Desempenho por operação", secao))
-    tabela = [["Operação", "Média geral", "Total", "1 díg.", "2 díg.", "3 díg.", "4 díg."]]
+    tabela = [["Operação", "Média", "Total"] + [f"{n} díg." for n in NIVEIS]]
 
     for chave, simbolo, rotulo in OPERACOES:
         geral = por_operacao.get(chave, {}) or {}
@@ -122,14 +136,14 @@ def gerar_pdf(resumo):
         linha = [
             f"{simbolo} {rotulo}",
             formatar_tempo(geral.get("media")),
-            str(int(geral.get("quantidade", 0) or 0)),
+            str(quantidade_de(geral)),
         ]
         for nivel in NIVEIS:
             cat = categorias.get(str(nivel), categorias.get(nivel, {})) or {}
-            linha.append(f"{formatar_tempo(cat.get('media'))} ({int(cat.get('quantidade', 0) or 0)}x)")
+            linha.append(f"{formatar_tempo(cat.get('media'))} ({quantidade_de(cat)}x)")
         tabela.append(linha)
 
-    tabela_pdf = Table(tabela, colWidths=[3.2 * cm, 2.3 * cm, 1.5 * cm, 2.1 * cm, 2.1 * cm, 2.1 * cm, 2.1 * cm], repeatRows=1)
+    tabela_pdf = Table(tabela, colWidths=[2.9 * cm, 1.8 * cm, 1.2 * cm] + [1.85 * cm] * len(NIVEIS), repeatRows=1)
     tabela_pdf.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5b4636")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -145,8 +159,32 @@ def gerar_pdf(resumo):
     ]))
     elementos.append(tabela_pdf)
     elementos.append(Spacer(1, 14))
+
+    elementos.append(Paragraph("Fases sem níveis de dígitos", secao))
+    tabela_modos = [["Modo", "Média", "Fases concluídas"]]
+    for chave, rotulo in MODOS:
+        dados = por_modo.get(chave, {}) or {}
+        tabela_modos.append([rotulo, formatar_tempo(dados.get("media")), str(quantidade_de(dados))])
+
+    tabela_modos_pdf = Table(tabela_modos, colWidths=[8 * cm, 4.5 * cm, 4.5 * cm], repeatRows=1)
+    tabela_modos_pdf.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5b4636")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#d8c7b3")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdf6ec")]),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 1), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    elementos.append(tabela_modos_pdf)
+    elementos.append(Spacer(1, 14))
+
     elementos.append(Paragraph(
-        "Os tempos são apresentados como médias por operação e nível de dígitos, usando os dados persistidos localmente pelo jogo.",
+        "Os tempos são apresentados como médias por operação e nível de dígitos, usando os dados persistidos localmente pelo jogo. "
+        "As fases de dinheiro e de contagem não se dividem por nº de algarismos e aparecem na tabela acima.",
         styles["Normal"],
     ))
 

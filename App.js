@@ -98,12 +98,9 @@ function AppInterno() {
   // --- Estatísticas (tempo médio por operação e por nível de dígitos, salvas em JSON) ---
   const [painelEstatisticasAberto, setPainelEstatisticasAberto] = useState(false);
   const [resumoEstatisticas, setResumoEstatisticas] = useState(null);
-  const [estatisticasBrutas, setEstatisticasBrutas] = useState(null);
 
   async function atualizarResumoEstatisticas() {
-    const dados = await carregarEstatisticas();
-    setResumoEstatisticas(calcularResumo(dados));
-    setEstatisticasBrutas(dados);
+    setResumoEstatisticas(calcularResumo(await carregarEstatisticas()));
   }
 
   useEffect(() => {
@@ -124,14 +121,20 @@ function AppInterno() {
   const [segundos, setSegundos] = useState(0);
   const [tempoFinal, setTempoFinal] = useState(null);
   const intervaloTimerRef = useRef(null);
+  // `verificar` é memoizado sem depender de `segundos`, então finalizarFase
+  // enxergaria o valor do render em que o callback foi criado — zero, já que é
+  // logo depois do cronômetro reiniciar. A ref dá o valor corrente.
+  const segundosRef = useRef(0);
 
   useEffect(() => {
     // (re)inicia o timer sempre que uma nova fase é gerada
     setSegundos(0);
     setTempoFinal(null);
+    segundosRef.current = 0;
     clearInterval(intervaloTimerRef.current);
     intervaloTimerRef.current = setInterval(() => {
-      setSegundos((s) => s + 1);
+      segundosRef.current += 1;
+      setSegundos(segundosRef.current);
     }, 1000);
     return () => clearInterval(intervaloTimerRef.current);
   }, [faseId]);
@@ -164,13 +167,14 @@ function AppInterno() {
     clearInterval(intervaloConfirmacaoRef.current);
     clearTimeout(timeoutConfirmacaoRef.current);
     clearInterval(intervaloTimerRef.current);
+    const tempo = segundosRef.current;
     setEmConfirmacao(false);
     setResolvido(true);
-    setTempoFinal(segundos);
+    setTempoFinal(tempo);
     Speech.speak('Parabéns! A conta está correta!', { language: 'pt-BR', rate: 0.95 });
 
     // grava o tempo na categoria operação + nível de dígitos dessa fase
-    registrarTempo(fase.operacao, fase.maxDigitos, segundos).then(() => {
+    registrarTempo(fase.operacao, fase.maxDigitos, tempo).then(() => {
       atualizarResumoEstatisticas();
     });
   }
@@ -306,13 +310,10 @@ function AppInterno() {
         </View>
 
         <TrilhaConta
-          estatisticas={estatisticasBrutas}
           onSelecionarAno={(ano) => {
             setAnoContaSelecionado(ano);
             setTela('blocoAno');
           }}
-          onVoltar={() => {}}
-          inline={true}
         />
 
         <View style={styles.espacoFilho} />

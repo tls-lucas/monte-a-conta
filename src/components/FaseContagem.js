@@ -18,7 +18,7 @@ import {
   contagemComOperadorEstaCorreta,
   contagemSimplesEstaCorreta,
 } from '../utils/validadorContagem';
-import { registrarTempo } from '../utils/estatisticas';
+import { registrarTempo, NIVEL_UNICO } from '../utils/estatisticas';
 import { useAparencia } from '../contexto/AparenciaContext';
 
 const TOLERANCIA_Y = 30;
@@ -90,6 +90,10 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
   const [segundos, setSegundos] = useState(0);
   const [tempoFinal, setTempoFinal] = useState(null);
   const intervaloTimerRef = useRef(null);
+  // `verificar` é memoizado sem depender de `segundos`, então finalizarFase
+  // enxergaria o valor do render em que o callback foi criado — zero, já que é
+  // logo depois do cronômetro reiniciar. A ref dá o valor corrente.
+  const segundosRef = useRef(0);
 
   const [emConfirmacao, setEmConfirmacao] = useState(false);
   const [contagemConfirmacao, setContagemConfirmacao] = useState(SEGUNDOS_CONFIRMACAO);
@@ -99,8 +103,12 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
   useEffect(() => {
     setSegundos(0);
     setTempoFinal(null);
+    segundosRef.current = 0;
     clearInterval(intervaloTimerRef.current);
-    intervaloTimerRef.current = setInterval(() => setSegundos((s) => s + 1), 1000);
+    intervaloTimerRef.current = setInterval(() => {
+      segundosRef.current += 1;
+      setSegundos(segundosRef.current);
+    }, 1000);
     return () => clearInterval(intervaloTimerRef.current);
   }, [faseId]);
 
@@ -124,11 +132,12 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
     clearInterval(intervaloConfirmacaoRef.current);
     clearTimeout(timeoutConfirmacaoRef.current);
     clearInterval(intervaloTimerRef.current);
+    const tempo = segundosRef.current;
     setEmConfirmacao(false);
     setResolvido(true);
-    setTempoFinal(segundos);
+    setTempoFinal(tempo);
     Speech.speak('Parabéns! Contagem certa!', { language: 'pt-BR', rate: 0.95 });
-    registrarTempo('contagem', 1, segundos).then(() => {
+    registrarTempo('contagem', NIVEL_UNICO, tempo).then(() => {
       onConcluida && onConcluida();
     });
   }

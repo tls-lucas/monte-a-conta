@@ -92,6 +92,11 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
   const [segundos, setSegundos] = useState(0);
   const [tempoFinal, setTempoFinal] = useState(null);
   const intervaloTimerRef = useRef(null);
+  // `verificar` é memoizado sem depender de `segundos`, então a função que o
+  // timer de confirmação agenda enxerga o valor do render em que o callback foi
+  // criado — que é justamente quando o cronômetro acabou de zerar. A ref dá o
+  // valor corrente na hora de fechar a conta.
+  const segundosRef = useRef(0);
 
   const [emConfirmacao, setEmConfirmacao] = useState(false);
   const [contagemConfirmacao, setContagemConfirmacao] = useState(SEGUNDOS_CONFIRMACAO);
@@ -102,8 +107,12 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
   useEffect(() => {
     setSegundos(0);
     setTempoFinal(null);
+    segundosRef.current = 0;
     clearInterval(intervaloTimerRef.current);
-    intervaloTimerRef.current = setInterval(() => setSegundos((s) => s + 1), 1000);
+    intervaloTimerRef.current = setInterval(() => {
+      segundosRef.current += 1;
+      setSegundos(segundosRef.current);
+    }, 1000);
     return () => clearInterval(intervaloTimerRef.current);
   }, [faseId]);
 
@@ -174,18 +183,18 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
     clearInterval(intervaloConfirmacaoRef.current);
     clearTimeout(timeoutConfirmacaoRef.current);
     clearInterval(intervaloTimerRef.current);
+    const tempo = segundosRef.current;
     setEmConfirmacao(false);
     setResolvido(true);
-    setTempoFinal(segundos);
+    setTempoFinal(tempo);
     Speech.speak('Parabéns! A conta está correta!', { language: 'pt-BR', rate: 0.95 });
 
     const ehUltima = indiceConta >= EXERCICIOS_POR_BLOCO - 1;
-    registrarTempo(fase.operacao, fase.maxDigitos, segundos).then(() => {
+    registrarTempo(fase.operacao, fase.maxDigitos, tempo).then(() => {
       if (ehUltima) {
         setBlocoConcluido(true);
-        return registrarTempo(`conta_ano_${ano}`, 1, segundos).then(() => {
-          onConcluido && onConcluido();
-        });
+        onConcluido && onConcluido();
+        return;
       }
       timeoutProximaRef.current = setTimeout(() => trocarFase(config, indiceConta + 1), 1500);
     });
