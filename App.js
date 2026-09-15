@@ -312,11 +312,11 @@ function AppInterno() {
 
         <View style={styles.espacoFilho} />
 
-        <TouchableOpacity style={styles.botaoFaseDinheiro} onPress={() => setTela('dinheiro')}>
+        <TouchableOpacity style={[styles.botaoFaseDinheiro, { backgroundColor: coresInterface.botaoFaseDinheiro }]} onPress={() => setTela('dinheiro')}>
           <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botaoFaseContagem} onPress={() => setTela('contagem')}>
+        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: coresInterface.botaoFaseContagem }]} onPress={() => setTela('contagem')}>
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
         </TouchableOpacity>
 
@@ -497,7 +497,6 @@ const styles = StyleSheet.create({
   botaoFaseDinheiro: {
     marginHorizontal: 16,
     marginBottom: 16,
-    backgroundColor: '#2e7dd1',
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
@@ -505,7 +504,6 @@ const styles = StyleSheet.create({
   botaoFaseContagem: {
     marginHorizontal: 16,
     marginBottom: 16,
-    backgroundColor: '#6fc270',
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
