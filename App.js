@@ -266,19 +266,6 @@ function AppInterno() {
     return <FaseContagem onVoltar={() => setTela('menu')} onConcluida={atualizarResumoEstatisticas} />;
   }
 
-  if (tela === 'trilhaConta') {
-    return (
-      <TrilhaConta
-        estatisticas={estatisticasBrutas}
-        onSelecionarAno={(ano) => {
-          setAnoContaSelecionado(ano);
-          setTela('blocoAno');
-        }}
-        onVoltar={() => setTela('menu')}
-      />
-    );
-  }
-
   if (tela === 'blocoAno' && anoContaSelecionado) {
     return (
       <BlocoExerciciosAno
@@ -321,9 +308,15 @@ function AppInterno() {
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: '#8b5fbf' }]} onPress={() => setTela('trilhaConta')}>
-          <Text style={styles.botaoFaseDinheiroTexto}>🧮 Conta (aritmética)</Text>
-        </TouchableOpacity>
+        <TrilhaConta
+          estatisticas={estatisticasBrutas}
+          onSelecionarAno={(ano) => {
+            setAnoContaSelecionado(ano);
+            setTela('blocoAno');
+          }}
+          onVoltar={() => {}}
+          inline={true}
+        />
 
         <PainelAparencia
           visivel={painelAparenciaAberto}

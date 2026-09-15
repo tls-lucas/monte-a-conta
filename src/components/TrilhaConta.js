@@ -22,8 +22,39 @@ function obterStatusAno(estatisticas, ano) {
   return 'completa';
 }
 
-export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar }) {
+export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, inline = false }) {
   const { interface: coresInterface } = useAparencia();
+
+  if (inline) {
+    return (
+      <View style={[styles.trilhaInline, { backgroundColor: coresInterface.fundoTela }]}>
+        <View style={styles.trilhaInlineConteudo}>
+          {ANOS.map((item, index) => {
+            const offsetX = Math.round(Math.sin((index * Math.PI) / 4) * 50);
+            const status = obterStatusAno(estatisticas, item.ano);
+
+            return (
+              <View key={item.ano} style={[styles.linha, { marginLeft: offsetX }]}>
+                {index < ANOS.length - 1 && <View style={styles.conector} />}
+                <TouchableOpacity
+                  style={[
+                    styles.node,
+                    { backgroundColor: coresInterface.botaoFaseContagem },
+                    status === 'completa' && styles.nodeCompleto,
+                  ]}
+                  onPress={() => onSelecionarAno(item.ano)}
+                >
+                  <Text style={styles.nodeTexto}>{item.titulo}</Text>
+                  <Text style={styles.nodeDescricao}>{item.descricao}</Text>
+                  {status === 'completa' && <Text style={styles.nodeBadge}>✓</Text>}
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
@@ -68,6 +99,16 @@ export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar })
 }
 
 const styles = StyleSheet.create({
+  trilhaInline: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderRadius: 12,
+  },
+  trilhaInlineConteudo: {
+    gap: 16,
+  },
   container: {
     flex: 1,
   },
