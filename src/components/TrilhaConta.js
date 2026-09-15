@@ -27,28 +27,26 @@ export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, i
 
   if (inline) {
     return (
-      <View style={[styles.trilhaInline, { backgroundColor: coresInterface.fundoTela }]}>
+      <View style={styles.trilhaInline}>
+        <Text style={[styles.trilhaInlineTitulo, { color: coresInterface.textoPrincipal }]}>🧮 Conta Aritmética</Text>
         <View style={styles.trilhaInlineConteudo}>
-          {ANOS.map((item, index) => {
-            const offsetX = Math.round(Math.sin((index * Math.PI) / 4) * 50);
+          {ANOS.map((item) => {
             const status = obterStatusAno(estatisticas, item.ano);
 
             return (
-              <View key={item.ano} style={[styles.linha, { marginLeft: offsetX }]}>
-                {index < ANOS.length - 1 && <View style={styles.conector} />}
-                <TouchableOpacity
-                  style={[
-                    styles.node,
-                    { backgroundColor: coresInterface.botaoFaseContagem },
-                    status === 'completa' && styles.nodeCompleto,
-                  ]}
-                  onPress={() => onSelecionarAno(item.ano)}
-                >
-                  <Text style={styles.nodeTexto}>{item.titulo}</Text>
-                  <Text style={styles.nodeDescricao}>{item.descricao}</Text>
-                  {status === 'completa' && <Text style={styles.nodeBadge}>✓</Text>}
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                key={item.ano}
+                style={[
+                  styles.nodeInline,
+                  { backgroundColor: coresInterface.botaoFaseContagem },
+                  status === 'completa' && styles.nodeInlineCompleto,
+                ]}
+                onPress={() => onSelecionarAno(item.ano)}
+              >
+                <Text style={styles.nodeInlineTexto}>{item.titulo}</Text>
+                <Text style={styles.nodeInlineDescricao}>{item.descricao}</Text>
+                {status === 'completa' && <Text style={styles.nodeBadge}>✓</Text>}
+              </TouchableOpacity>
             );
           })}
         </View>
@@ -101,13 +99,37 @@ export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, i
 const styles = StyleSheet.create({
   trilhaInline: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginTop: 8,
+    paddingVertical: 12,
+    marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 12,
+  },
+  trilhaInlineTitulo: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 10,
   },
   trilhaInlineConteudo: {
-    gap: 16,
+    gap: 6,
+  },
+  nodeInline: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    position: 'relative',
+  },
+  nodeInlineCompleto: {
+    opacity: 0.85,
+  },
+  nodeInlineTexto: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  nodeInlineDescricao: {
+    color: '#ffffff',
+    fontSize: 11,
+    marginTop: 2,
+    opacity: 0.9,
   },
   container: {
     flex: 1,

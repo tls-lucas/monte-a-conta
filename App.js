@@ -300,14 +300,6 @@ function AppInterno() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.botaoFaseDinheiro} onPress={() => setTela('dinheiro')}>
-          <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.botaoFaseContagem} onPress={() => setTela('contagem')}>
-          <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
-        </TouchableOpacity>
-
         <TrilhaConta
           estatisticas={estatisticasBrutas}
           onSelecionarAno={(ano) => {
@@ -317,6 +309,16 @@ function AppInterno() {
           onVoltar={() => {}}
           inline={true}
         />
+
+        <View style={styles.espacoFilho} />
+
+        <TouchableOpacity style={styles.botaoFaseDinheiro} onPress={() => setTela('dinheiro')}>
+          <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.botaoFaseContagem} onPress={() => setTela('contagem')}>
+          <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
+        </TouchableOpacity>
 
         <PainelAparencia
           visivel={painelAparenciaAberto}
@@ -569,6 +571,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  espacoFilho: {
+    flex: 1,
   },
 });
 
