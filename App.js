@@ -55,7 +55,12 @@ function formatarTempo(segundosTotais) {
 }
 
 function AppInterno() {
-  const { palco: coresPalco, interface: coresInterface } = useAparencia();
+  const {
+    palco: coresPalco,
+    interface: coresInterface,
+    cores,
+    quantidadeMaxDigitosContaAritmetica,
+  } = useAparencia();
   const [config, setConfig] = useState({
     operacoes: ['soma'],
     maxDigitos: 1,
@@ -270,7 +275,7 @@ function AppInterno() {
     return (
       <BlocoExerciciosAno
         ano={anoContaSelecionado}
-        quantidadeMaxDigitos={useAparencia().quantidadeMaxDigitosContaAritmetica}
+        quantidadeMaxDigitos={quantidadeMaxDigitosContaAritmetica}
         onVoltar={() => {
           setTela('trilhaConta');
           setAnoContaSelecionado(null);
@@ -312,11 +317,11 @@ function AppInterno() {
 
         <View style={styles.espacoFilho} />
 
-        <TouchableOpacity style={[styles.botaoFaseDinheiro, { backgroundColor: coresInterface.botaoFaseDinheiro }]} onPress={() => setTela('dinheiro')}>
+        <TouchableOpacity style={[styles.botaoFaseDinheiro, { backgroundColor: cores.numero }]} onPress={() => setTela('dinheiro')}>
           <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: coresInterface.botaoFaseContagem }]} onPress={() => setTela('contagem')}>
+        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: cores.operador }]} onPress={() => setTela('contagem')}>
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
         </TouchableOpacity>
 

@@ -69,6 +69,25 @@ export const ESQUEMAS_CORES = {
 
 export { gerarTonsMonocromaticos };
 
+// Mistura duas cores hex numa proporção (0 = corA, 1 = corB). Usada pra
+// distribuir os nós da trilha ao longo da paleta escolhida, em vez de
+// pintar todos com a mesma cor.
+export function misturarCores(corA, corB, proporcao) {
+  const canais = (hex) => [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
+  const [r1, g1, b1] = canais(corA);
+  const [r2, g2, b2] = canais(corB);
+  const t = Math.max(0, Math.min(1, proporcao));
+  const componente = (a, b) =>
+    Math.round(a + (b - a) * t)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${componente(r1, r2)}${componente(g1, g2)}${componente(b1, b2)}`.toUpperCase();
+}
+
 // cor de fundo do palco (área de arraste) por tema
 export const CORES_PALCO = {
   claro: { fundo: '#fdf6ec', caixaFlutuante: '#ffffff', textoCaixa: '#5b4636' },
@@ -85,8 +104,6 @@ export const CORES_INTERFACE = {
     fundoTemaBox: '#ffffff',
     timerBoxFundo: '#eee0cc',
     botaoIconeFundo: '#5b4636',
-    botaoFaseDinheiro: '#2e7dd1',
-    botaoFaseContagem: '#6fc270',
   },
   escuro: {
     fundoTela: '#1a1f2e',
@@ -96,15 +113,13 @@ export const CORES_INTERFACE = {
     fundoTemaBox: '#3d4450',
     timerBoxFundo: '#4d5363',
     botaoIconeFundo: '#6b7280',
-    botaoFaseDinheiro: '#1e6fb8',
-    botaoFaseContagem: '#5ab564',
   },
 };
 
 const AparenciaContext = createContext({
   ...PADRAO,
   escala: 1,
-  cores: ESQUEMAS_CORES.padrao,
+  cores: ESQUEMAS_CORES.azul,
   palco: CORES_PALCO.claro,
   interface: CORES_INTERFACE.claro,
   definirTema: () => {},
@@ -151,7 +166,7 @@ export function AparenciaProvider({ children }) {
   const valor = {
     ...preferencias,
     escala: preferencias.tamanho,
-    cores: cores || ESQUEMAS_CORES.padrao,
+    cores: cores || ESQUEMAS_CORES.azul,
     palco: CORES_PALCO[preferencias.tema] || CORES_PALCO.claro,
     interface: CORES_INTERFACE[preferencias.tema] || CORES_INTERFACE.claro,
     definirTema: (tema) => salvar({ ...preferencias, tema }),

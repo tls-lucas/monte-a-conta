@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
-import { useAparencia } from '../contexto/AparenciaContext';
+import { useAparencia, misturarCores } from '../contexto/AparenciaContext';
 
 const ANOS = [
   { ano: 1, titulo: '1º Ano', descricao: 'Adição e subtração (até 99)' },
@@ -23,14 +23,19 @@ function obterStatusAno(estatisticas, ano) {
 }
 
 export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, inline = false }) {
-  const { interface: coresInterface } = useAparencia();
+  const { interface: coresInterface, cores } = useAparencia();
+
+  // cada ano recebe um ponto da paleta atual, do tom mais claro (1º) ao
+  // mais forte (5º), então a trilha acompanha o esquema de cores escolhido
+  const corDoAno = (indice) =>
+    misturarCores(cores.igual, cores.numero, indice / (ANOS.length - 1));
 
   if (inline) {
     return (
       <View style={styles.trilhaInline}>
         <Text style={[styles.trilhaInlineTitulo, { color: coresInterface.textoPrincipal }]}>🧮 Conta Aritmética</Text>
         <View style={styles.trilhaInlineConteudo}>
-          {ANOS.map((item) => {
+          {ANOS.map((item, index) => {
             const status = obterStatusAno(estatisticas, item.ano);
 
             return (
@@ -38,7 +43,7 @@ export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, i
                 key={item.ano}
                 style={[
                   styles.nodeInline,
-                  { backgroundColor: coresInterface.botaoFaseContagem },
+                  { backgroundColor: corDoAno(index) },
                   status === 'completa' && styles.nodeInlineCompleto,
                 ]}
                 onPress={() => onSelecionarAno(item.ano)}
@@ -78,7 +83,7 @@ export default function TrilhaConta({ estatisticas, onSelecionarAno, onVoltar, i
               <TouchableOpacity
                 style={[
                   styles.node,
-                  { backgroundColor: coresInterface.botaoFaseContagem },
+                  { backgroundColor: corDoAno(index) },
                   status === 'completa' && styles.nodeCompleto,
                 ]}
                 onPress={() => onSelecionarAno(item.ano)}
