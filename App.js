@@ -13,7 +13,8 @@ import Peca, { TAMANHO_PECA } from './src/components/Peca';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
 import TrilhaFases from './src/components/TrilhaFases';
-import TrilhaAnos from './src/components/TrilhaAnos';
+import TrilhaConta from './src/components/TrilhaConta';
+import BlocoExerciciosAno from './src/components/BlocoExerciciosAno';
 import FaseDinheiro from './src/components/FaseDinheiro';
 import FaseContagem from './src/components/FaseContagem';
 import PainelAparencia from './src/components/PainelAparencia';
@@ -26,14 +27,6 @@ import { API_URL } from './src/services/relatorio';
 const TOLERANCIA_Y = 30;
 const GAP_MAXIMO = 55;
 const SEGUNDOS_CONFIRMACAO = 3;
-
-const CONFIGURACAO_ANOS = {
-  1: { operacoes: ['soma', 'subtracao'], maxDigitos: 1 },
-  2: { operacoes: ['soma', 'subtracao'], maxDigitos: 2 },
-  3: { operacoes: ['soma', 'subtracao', 'multiplicacao'], maxDigitos: 2 },
-  4: { operacoes: ['soma', 'subtracao', 'multiplicacao', 'divisao'], maxDigitos: 3 },
-  5: { operacoes: ['soma', 'subtracao', 'multiplicacao', 'divisao'], maxDigitos: 6 },
-};
 
 function posicaoAleatoriaSemSobrepor(existentes, areaW, areaH) {
   const margem = 16;
@@ -75,6 +68,7 @@ function AppInterno() {
 
   // 'menu' = trilha de seleção de fases, 'jogo' = tela do jogo em si
   const [tela, setTela] = useState('menu');
+  const [anoContaSelecionado, setAnoContaSelecionado] = useState(null);
 
   const janela = Dimensions.get('window');
   const [areaJogo, setAreaJogo] = useState({ w: janela.width, h: janela.height - 190 });
@@ -280,14 +274,32 @@ function AppInterno() {
     return <FaseContagem onVoltar={() => setTela('menu')} onConcluida={atualizarResumoEstatisticas} />;
   }
 
-  if (tela === 'trilhaAnos') {
+  if (tela === 'trilhaConta') {
     return (
-      <TrilhaAnos
+      <TrilhaConta
+        estatisticas={estatisticasBrutas}
         onSelecionarAno={(ano) => {
-          setConfig(CONFIGURACAO_ANOS[ano]);
-          setTela('jogo');
+          setAnoContaSelecionado(ano);
+          setTela('blocoAno');
         }}
         onVoltar={() => setTela('menu')}
+      />
+    );
+  }
+
+  if (tela === 'blocoAno' && anoContaSelecionado) {
+    return (
+      <BlocoExerciciosAno
+        ano={anoContaSelecionado}
+        quantidadeMaxDigitos={useAparencia().quantidadeMaxDigitosContaAritmetica}
+        onVoltar={() => {
+          setTela('trilhaConta');
+          setAnoContaSelecionado(null);
+        }}
+        onConcluido={() => {
+          atualizarResumoEstatisticas();
+          setTela('trilhaConta');
+        }}
       />
     );
   }
@@ -322,7 +334,7 @@ function AppInterno() {
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: '#8b5fbf' }]} onPress={() => setTela('trilhaAnos')}>
+        <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: '#8b5fbf' }]} onPress={() => setTela('trilhaConta')}>
           <Text style={styles.botaoFaseDinheiroTexto}>🧮 Conta (aritmética)</Text>
         </TouchableOpacity>
 

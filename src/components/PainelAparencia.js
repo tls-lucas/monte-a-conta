@@ -7,41 +7,59 @@
 
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { useAparencia } from '../contexto/AparenciaContext';
+import { useAparencia, ESQUEMAS_CORES } from '../contexto/AparenciaContext';
+import ColorPicker from './ColorPicker';
+import TamanhoSlider from './TamanhoSlider';
+import PaletaPreview from './PaletaPreview';
 
 const OPCOES_TEMA = [
   { chave: 'claro', rotulo: '☀️ Claro' },
   { chave: 'escuro', rotulo: '🌙 Escuro' },
 ];
 
-const OPCOES_TAMANHO = [
-  { chave: 'pequeno', rotulo: 'Pequeno' },
-  { chave: 'medio', rotulo: 'Médio' },
-  { chave: 'grande', rotulo: 'Grande' },
-];
+// OPCOES_TAMANHO removidas — agora usa slider contínuo
 
 const OPCOES_ESQUEMA = [
-  { chave: 'padrao', rotulo: 'Padrão' },
-  { chave: 'pastel', rotulo: 'Pastel' },
+  { chave: 'azul', rotulo: 'Azul' },
+  { chave: 'azul_pastel', rotulo: 'Azul Pastel' },
+  { chave: 'verde', rotulo: 'Verde' },
+  { chave: 'verde_pastel', rotulo: 'Verde Pastel' },
+  { chave: 'roxo', rotulo: 'Roxo' },
+  { chave: 'roxo_pastel', rotulo: 'Roxo Pastel' },
+  { chave: 'laranja', rotulo: 'Laranja' },
+  { chave: 'laranja_pastel', rotulo: 'Laranja Pastel' },
+  { chave: 'rosa', rotulo: 'Rosa' },
+  { chave: 'rosa_pastel', rotulo: 'Rosa Pastel' },
+  { chave: 'quente', rotulo: 'Quente' },
+  { chave: 'frio', rotulo: 'Frio' },
+  { chave: 'floresta', rotulo: 'Floresta' },
+  { chave: 'sunset', rotulo: 'Sunset' },
+  { chave: 'neon', rotulo: 'Neon' },
   { chave: 'monocromatico', rotulo: 'Monocromático' },
+  { chave: 'personalizado', rotulo: 'Personalizado' },
 ];
 
-function LinhaOpcoes({ titulo, opcoes, valorAtual, aoEscolher }) {
+function LinhaOpcoes({ titulo, opcoes, valorAtual, aoEscolher, coresInterface, mostrarPreview }) {
   return (
     <View style={styles.secao}>
-      <Text style={styles.secaoTitulo}>{titulo}</Text>
+      <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>{titulo}</Text>
       <View style={styles.opcoesLinha}>
         {opcoes.map((op) => {
           const selecionado = op.chave === valorAtual;
           return (
             <TouchableOpacity
               key={op.chave}
-              style={[styles.opcaoBotao, selecionado && styles.opcaoBotaoSelecionado]}
+              style={[styles.opcaoBotao, selecionado && styles.opcaoBotaoSelecionado, { backgroundColor: selecionado ? coresInterface.botaoIconeFundo : coresInterface.fundoCaixa }]}
               onPress={() => aoEscolher(op.chave)}
             >
-              <Text style={[styles.opcaoTexto, selecionado && styles.opcaoTextoSelecionado]}>
-                {op.rotulo}
-              </Text>
+              <View style={styles.opcaoConteudo}>
+                <Text style={[styles.opcaoTexto, selecionado && styles.opcaoTextoSelecionado, { color: selecionado ? '#fff' : coresInterface.textoPrincipal }]}>
+                  {op.rotulo}
+                </Text>
+                {mostrarPreview && ESQUEMAS_CORES[op.chave] && (
+                  <PaletaPreview cores={ESQUEMAS_CORES[op.chave]} />
+                )}
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -51,17 +69,30 @@ function LinhaOpcoes({ titulo, opcoes, valorAtual, aoEscolher }) {
 }
 
 export default function PainelAparencia({ visivel, onFechar }) {
-  const { tema, tamanho, esquemaCores, definirTema, definirTamanho, definirEsquemaCores } =
-    useAparencia();
+  const {
+    tema,
+    tamanho,
+    esquemaCores,
+    corPrincipalMonocromatica,
+    coresPersonalizadas,
+    quantidadeMaxDigitosContaAritmetica,
+    definirTema,
+    definirTamanho,
+    definirEsquemaCores,
+    definirCorPrincipalMonocromatica,
+    definirCoresPersonalizadas,
+    definirQuantidadeMaxDigitosContaAritmetica,
+    interface: coresInterface,
+  } = useAparencia();
 
   return (
     <Modal visible={visivel} animationType="slide" transparent onRequestClose={onFechar}>
       <View style={styles.fundo}>
-        <View style={styles.cartao}>
+        <View style={[styles.cartao, { backgroundColor: coresInterface.fundoTela }]}>
           <View style={styles.cabecalho}>
-            <Text style={styles.titulo}>🎨 Aparência</Text>
+            <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🎨 Aparência</Text>
             <TouchableOpacity onPress={onFechar}>
-              <Text style={styles.fechar}>✕</Text>
+              <Text style={[styles.fechar, { color: coresInterface.textoSecundario }]}>✕</Text>
             </TouchableOpacity>
           </View>
 
@@ -71,21 +102,84 @@ export default function PainelAparencia({ visivel, onFechar }) {
               opcoes={OPCOES_TEMA}
               valorAtual={tema}
               aoEscolher={definirTema}
+              coresInterface={coresInterface}
             />
-            <LinhaOpcoes
-              titulo="Tamanho dos blocos"
-              opcoes={OPCOES_TAMANHO}
-              valorAtual={tamanho}
-              aoEscolher={definirTamanho}
-            />
+
+            <View style={styles.secao}>
+              <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Tamanho dos blocos</Text>
+              <TamanhoSlider valorAtual={tamanho} aoMudar={definirTamanho} />
+            </View>
+
+            <View style={styles.secao}>
+              <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Dígitos máximos (Conta)</Text>
+              <View style={styles.controleDigitos}>
+                <TouchableOpacity
+                  style={[styles.botaoDigito, { backgroundColor: coresInterface.botaoIconeFundo }]}
+                  onPress={() => definirQuantidadeMaxDigitosContaAritmetica(Math.max(1, quantidadeMaxDigitosContaAritmetica - 1))}
+                >
+                  <Text style={styles.botaoDigitoTexto}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.digitoValor, { color: coresInterface.textoPrincipal }]}>
+                  {quantidadeMaxDigitosContaAritmetica}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.botaoDigito, { backgroundColor: coresInterface.botaoIconeFundo }]}
+                  onPress={() => definirQuantidadeMaxDigitosContaAritmetica(Math.min(6, quantidadeMaxDigitosContaAritmetica + 1))}
+                >
+                  <Text style={styles.botaoDigitoTexto}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <LinhaOpcoes
               titulo="Cores das peças"
               opcoes={OPCOES_ESQUEMA}
               valorAtual={esquemaCores}
               aoEscolher={definirEsquemaCores}
+              coresInterface={coresInterface}
+              mostrarPreview={true}
             />
-            <Text style={styles.aviso}>
-              A fase de dinheiro não é afetada — ela sempre usa as cores reais das cédulas.
+
+            {esquemaCores === 'monocromatico' && (
+              <View style={styles.secao}>
+                <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Cor principal</Text>
+                <ColorPicker
+                  corSelecionada={corPrincipalMonocromatica}
+                  aoEscolher={definirCorPrincipalMonocromatica}
+                />
+              </View>
+            )}
+
+            {esquemaCores === 'personalizado' && (
+              <View style={styles.secao}>
+                <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Cor do número</Text>
+                <ColorPicker
+                  corSelecionada={coresPersonalizadas.numero}
+                  aoEscolher={(cor) =>
+                    definirCoresPersonalizadas({ ...coresPersonalizadas, numero: cor })
+                  }
+                />
+
+                <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Cor do operador</Text>
+                <ColorPicker
+                  corSelecionada={coresPersonalizadas.operador}
+                  aoEscolher={(cor) =>
+                    definirCoresPersonalizadas({ ...coresPersonalizadas, operador: cor })
+                  }
+                />
+
+                <Text style={[styles.secaoTitulo, { color: coresInterface.textoSecundario }]}>Cor do igual</Text>
+                <ColorPicker
+                  corSelecionada={coresPersonalizadas.igual}
+                  aoEscolher={(cor) =>
+                    definirCoresPersonalizadas({ ...coresPersonalizadas, igual: cor })
+                  }
+                />
+              </View>
+            )}
+
+            <Text style={[styles.aviso, { color: coresInterface.textoSecundario }]}>
+              A fase de dinheiro não é afetada — ela sempre usa as cores reais das cédulas. O emoji é sempre branco.
             </Text>
           </ScrollView>
         </View>
@@ -121,13 +215,42 @@ const styles = StyleSheet.create({
   secaoTitulo: { fontSize: 14, fontWeight: '700', color: '#8a7a66', marginBottom: 8 },
   opcoesLinha: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   opcaoBotao: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 12,
     backgroundColor: '#eee0cc',
   },
   opcaoBotaoSelecionado: { backgroundColor: '#5b4636' },
-  opcaoTexto: { fontSize: 14, fontWeight: '600', color: '#5b4636' },
+  opcaoConteudo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  opcaoTexto: { fontSize: 13, fontWeight: '600', color: '#5b4636' },
   opcaoTextoSelecionado: { color: '#fff' },
   aviso: { fontSize: 12, color: '#8a7a66', fontStyle: 'italic', marginTop: -8 },
+  controleDigitos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  botaoDigito: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  botaoDigitoTexto: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  digitoValor: {
+    fontSize: 20,
+    fontWeight: '700',
+    minWidth: 40,
+    textAlign: 'center',
+  },
 });
