@@ -1,6 +1,12 @@
 import React, { useRef, useReducer, useEffect } from 'react';
-import { Animated, PanResponder, Platform, StyleSheet, Text } from 'react-native';
+import { Animated, Image, PanResponder, Platform, StyleSheet, Text } from 'react-native';
 import { useAparencia } from '../contexto/AparenciaContext';
+
+const ARTE_CEDULA = require('../img/nota.png');
+// A arte vem em dois tons de cinza. A camada de baixo é tingida com a cor da
+// cédula (tintColor achata tudo numa cor só) e a de cima repõe o cinza
+// original, meio translúcido, devolvendo o contraste entre moldura e miolo.
+const OPACIDADE_SOMBREADO = 0.42;
 
 // cores padrão, usadas como último recurso caso o context não esteja disponível
 const CORES_PADRAO = {
@@ -124,6 +130,8 @@ export default function Peca({
     }
   }, [celebrando]);
 
+  const ehCedula = tipo === 'cedula';
+
   return (
     <Animated.View
       {...(bloqueada ? {} : NA_WEB ? handlersWeb : panResponder.panHandlers)}
@@ -132,16 +140,41 @@ export default function Peca({
         {
           width: larguraFinal,
           height: alturaFinal,
-          backgroundColor: corFundo,
+          // a cédula é desenhada pela arte; o fundo sólido apagaria o recorte
+          backgroundColor: ehCedula ? 'transparent' : corFundo,
           left: posRef.current.x,
           top: posRef.current.y,
           transform: [{ scale: escalaAnimada }],
           borderColor: alinhada ? '#2e8b2e' : 'transparent',
           opacity: bloqueada ? 0.85 : 1,
         },
+        ehCedula && styles.pecaCedula,
       ]}
     >
-      <Text style={[styles.texto, { fontSize: fonteFinal }]} selectable={false}>
+      {ehCedula && (
+        <>
+          <Image
+            source={ARTE_CEDULA}
+            style={[styles.arte, { tintColor: corFundo }]}
+            resizeMode="stretch"
+            pointerEvents="none"
+          />
+          <Image
+            source={ARTE_CEDULA}
+            style={[styles.arte, { opacity: OPACIDADE_SOMBREADO }]}
+            resizeMode="stretch"
+            pointerEvents="none"
+          />
+        </>
+      )}
+      <Text
+        style={[
+          styles.texto,
+          { fontSize: fonteFinal },
+          ehCedula && styles.textoCedula,
+        ]}
+        selectable={false}
+      >
         {valor}
       </Text>
     </Animated.View>
@@ -178,5 +211,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     ...semInterferenciaWeb,
+  },
+  pecaCedula: {
+    // a silhueta da arte já arredonda os cantos; sombra e borda sólidas
+    // apareceriam como um retângulo em volta dela
+    shadowOpacity: 0,
+    elevation: 0,
+    overflow: 'visible',
+  },
+  arte: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  textoCedula: {
+    // o rótulo fica sobre o miolo claro da nota, então precisa de contorno
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });
