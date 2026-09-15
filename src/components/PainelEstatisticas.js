@@ -14,7 +14,7 @@ function formatarTempo(segundos) {
 }
 
 export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar }) {
-  const { interface: coresInterface } = useAparencia();
+  const { interface: coresInterface, cores } = useAparencia();
   const [email, setEmail] = useState('');
   const [enviando, setEnviando] = useState(false);
 
@@ -39,7 +39,11 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
 
     try {
       setEnviando(true);
-      await enviarRelatorioPorEmail(destinatario, resumo);
+      await enviarRelatorioPorEmail(destinatario, resumo, {
+        numero: cores.numero,
+        operador: cores.operador,
+        igual: cores.igual,
+      });
       Alert.alert('Relatório enviado', `O relatório foi enviado para ${destinatario}.`);
     } catch (erro) {
       Alert.alert('Erro ao enviar', erro.message || 'Não foi possível enviar o relatório.');

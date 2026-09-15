@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import tempfile
 from datetime import datetime
 
@@ -33,6 +34,19 @@ MODOS = [
 ]
 
 
+# Paleta de fallback: a mesma cara de sempre, usada quando o app não manda as
+# cores (versões antigas do cliente ou chamada direta ao endpoint de PDF).
+PALETA_PADRAO = {
+    "escura": "#5b4636",
+    "destaque": "#2f7ab8",
+    "clara": "#fdf6ec",
+    "borda": "#d8c7b3",
+    "texto": "#5b4636",
+}
+
+HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
 def formatar_tempo(segundos):
     if segundos is None:
         return "—"
@@ -41,7 +55,81 @@ def formatar_tempo(segundos):
     return f"{minutos:02d}:{segundos:02d}"
 
 
-def gerar_pdf(resumo):
+def _canais(hex_cor):
+    return tuple(int(hex_cor[i:i + 2], 16) for i in (1, 3, 5))
+
+
+def _para_hex(r, g, b):
+    limita = lambda v: max(0, min(255, int(round(v))))
+    return f"#{limita(r):02x}{limita(g):02x}{limita(b):02x}"
+
+
+def _luminancia(hex_cor):
+    r, g, b = _canais(hex_cor)
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+
+def _misturar(hex_a, hex_b, t):
+    ra, ga, ba = _canais(hex_a)
+    rb, gb, bb = _canais(hex_b)
+    return _para_hex(ra + (rb - ra) * t, ga + (gb - ga) * t, ba + (bb - ba) * t)
+
+
+def _contraste(hex_fundo):
+    """Preto ou branco, o que for legível sobre o fundo."""
+    return colors.black if _luminancia(hex_fundo) > 0.6 else colors.white
+
+
+def _escurecer_para_texto(hex_cor, alvo=0.45):
+    """Puxa a cor para o escuro até ela sustentar leitura sobre fundo claro."""
+    proporcao = 0.0
+    resultado = hex_cor
+    while _luminancia(resultado) > alvo and proporcao < 0.9:
+        proporcao += 0.1
+        resultado = _misturar(hex_cor, "#000000", proporcao)
+    return resultado
+
+
+def montar_paleta(cores):
+    """
+    Deriva as cores do relatório a partir do esquema escolhido no app
+    ({numero, operador, igual}). O tom do número vira a cor de cabeçalho, o do
+    operador vira o destaque dos números, e o do igual, bem clareado, vira o
+    fundo das linhas alternadas.
+    """
+    if not isinstance(cores, dict):
+        return dict(PALETA_PADRAO)
+
+    def valida(chave):
+        valor = cores.get(chave)
+        return valor if isinstance(valor, str) and HEX.match(valor) else None
+
+    numero, operador, igual = valida("numero"), valida("operador"), valida("igual")
+    if not numero:
+        return dict(PALETA_PADRAO)
+
+    operador = operador or numero
+    igual = igual or numero
+    # cabeçalho sempre com corpo suficiente pra sustentar texto claro
+    escura = numero if _luminancia(numero) < 0.62 else _misturar(numero, "#000000", 0.35)
+    return {
+        "escura": escura,
+        # o destaque é usado como texto sobre fundo claro, então precisa de peso
+        "destaque": _escurecer_para_texto(operador),
+        "clara": _misturar(igual, "#ffffff", 0.88),
+        "borda": _misturar(igual, "#ffffff", 0.55),
+        "texto": _misturar(escura, "#000000", 0.15),
+    }
+
+
+def gerar_pdf(resumo, cores=None):
+    paleta = montar_paleta(cores)
+    cor_escura = colors.HexColor(paleta["escura"])
+    cor_destaque = colors.HexColor(paleta["destaque"])
+    cor_clara = colors.HexColor(paleta["clara"])
+    cor_borda = colors.HexColor(paleta["borda"])
+    cor_texto = colors.HexColor(paleta["texto"])
+    cor_sobre_escura = _contraste(paleta["escura"])
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -59,21 +147,21 @@ def gerar_pdf(resumo):
         parent=styles["Title"],
         fontSize=20,
         leading=24,
-        textColor=colors.HexColor("#5b4636"),
+        textColor=cor_texto,
         spaceAfter=8,
     )
     subtitulo = ParagraphStyle(
         "SubtituloMonteConta",
         parent=styles["Normal"],
         fontSize=10,
-        textColor=colors.HexColor("#8a7a66"),
+        textColor=colors.HexColor(_misturar(paleta["texto"], "#ffffff", 0.45)),
         spaceAfter=16,
     )
     secao = ParagraphStyle(
         "SecaoMonteConta",
         parent=styles["Heading2"],
         fontSize=14,
-        textColor=colors.HexColor("#5b4636"),
+        textColor=cor_texto,
         spaceBefore=10,
         spaceAfter=8,
     )
@@ -115,11 +203,12 @@ def gerar_pdf(resumo):
         colWidths=[10 * cm, 7 * cm],
     )
     resumo_tabela.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5b4636")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("BACKGROUND", (0, 0), (-1, 0), cor_escura),
+        ("TEXTCOLOR", (0, 0), (-1, 0), cor_sobre_escura),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#d8c7b3")),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#fdf6ec")),
+        ("GRID", (0, 0), (-1, -1), 0.5, cor_borda),
+        ("BACKGROUND", (0, 1), (-1, -1), cor_clara),
+        ("TEXTCOLOR", (0, 1), (-1, -1), cor_texto),
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("TOPPADDING", (0, 0), (-1, -1), 7),
@@ -145,13 +234,15 @@ def gerar_pdf(resumo):
 
     tabela_pdf = Table(tabela, colWidths=[2.9 * cm, 1.8 * cm, 1.2 * cm] + [1.85 * cm] * len(NIVEIS), repeatRows=1)
     tabela_pdf.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5b4636")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("BACKGROUND", (0, 0), (-1, 0), cor_escura),
+        ("TEXTCOLOR", (0, 0), (-1, 0), cor_sobre_escura),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 7.5),
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#d8c7b3")),
-        ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdf6ec")]),
+        ("GRID", (0, 0), (-1, -1), 0.4, cor_borda),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, cor_clara]),
+        ("TEXTCOLOR", (0, 1), (-1, -1), cor_texto),
+        ("TEXTCOLOR", (1, 1), (1, -1), cor_destaque),
+        ("FONTNAME", (1, 1), (1, -1), "Helvetica-Bold"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (1, 1), (-1, -1), "CENTER"),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
@@ -168,12 +259,15 @@ def gerar_pdf(resumo):
 
     tabela_modos_pdf = Table(tabela_modos, colWidths=[8 * cm, 4.5 * cm, 4.5 * cm], repeatRows=1)
     tabela_modos_pdf.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#5b4636")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("BACKGROUND", (0, 0), (-1, 0), cor_escura),
+        ("TEXTCOLOR", (0, 0), (-1, 0), cor_sobre_escura),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 8.5),
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#d8c7b3")),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#fdf6ec")]),
+        ("GRID", (0, 0), (-1, -1), 0.4, cor_borda),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, cor_clara]),
+        ("TEXTCOLOR", (0, 1), (-1, -1), cor_texto),
+        ("TEXTCOLOR", (1, 1), (1, -1), cor_destaque),
+        ("FONTNAME", (1, 1), (1, -1), "Helvetica-Bold"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (1, 1), (-1, -1), "CENTER"),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
@@ -211,7 +305,7 @@ def health():
 @app.post("/relatorios/pdf")
 def relatorio_pdf():
     dados = request.get_json(silent=True) or {}
-    pdf = gerar_pdf(dados.get("resumo", {}))
+    pdf = gerar_pdf(dados.get("resumo", {}), dados.get("cores"))
     return send_file(
         pdf,
         mimetype="application/pdf",
@@ -237,7 +331,7 @@ def relatorio_email():
             "erro": "GMAIL_USER e GMAIL_APP_PASSWORD não estão configurados no backend/.env.",
         }), 500
 
-    pdf = gerar_pdf(resumo)
+    pdf = gerar_pdf(resumo, dados.get("cores"))
     caminho = None
     try:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as arquivo:

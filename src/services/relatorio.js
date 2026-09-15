@@ -11,11 +11,12 @@ export async function salvarUltimoEmailRelatorio(email) {
   await AsyncStorage.setItem(EMAIL_RELATORIO_KEY, email.trim());
 }
 
-export async function enviarRelatorioPorEmail(email, resumo) {
+/** `cores` é o esquema ativo ({ numero, operador, igual }); o PDF se pinta com ele. */
+export async function enviarRelatorioPorEmail(email, resumo, cores) {
   const resposta = await fetch(`${API_URL}/relatorios/email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim(), resumo }),
+    body: JSON.stringify({ email: email.trim(), resumo, cores }),
   });
 
   let dados = {};
