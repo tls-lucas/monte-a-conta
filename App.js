@@ -127,7 +127,11 @@ function AppInterno() {
   const segundosRef = useRef(0);
 
   useEffect(() => {
-    // (re)inicia o timer sempre que uma nova fase é gerada
+    // (re)inicia o timer sempre que uma nova fase é gerada. A fase livre fica
+    // montada por trás das outras telas (elas são early returns deste mesmo
+    // componente), então sem o recorte por tela o cronômetro dela corria no
+    // menu e o jogador entrava já com minutos acumulados.
+    if (tela !== 'jogo') return;
     setSegundos(0);
     setTempoFinal(null);
     segundosRef.current = 0;
@@ -137,7 +141,7 @@ function AppInterno() {
       setSegundos(segundosRef.current);
     }, 1000);
     return () => clearInterval(intervaloTimerRef.current);
-  }, [faseId]);
+  }, [faseId, tela]);
 
   // --- Confirmação de 3s antes de dar a fase como resolvida ---
   const [emConfirmacao, setEmConfirmacao] = useState(false);
