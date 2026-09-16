@@ -281,12 +281,12 @@ function AppInterno() {
         ano={anoContaSelecionado}
         quantidadeMaxDigitos={quantidadeMaxDigitosContaAritmetica}
         onVoltar={() => {
-          setTela('trilhaConta');
+          setTela('menu');
           setAnoContaSelecionado(null);
         }}
         onConcluido={() => {
           atualizarResumoEstatisticas();
-          setTela('trilhaConta');
+          setTela('menu');
         }}
       />
     );
@@ -324,6 +324,16 @@ function AppInterno() {
 
         <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: cores.operador }]} onPress={() => setTela('contagem')}>
           <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.botaoFaseContagem, { backgroundColor: cores.igual }]}
+          onPress={() => {
+            gerarNovaFaseComConfigAtual();
+            setTela('jogo');
+          }}
+        >
+          <Text style={styles.botaoFaseDinheiroTexto}>🧩 Fase livre</Text>
         </TouchableOpacity>
 
         <PainelAparencia
