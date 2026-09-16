@@ -1,9 +1,12 @@
 // src/components/BlocoExerciciosAno.js
 //
-// Bloco de contas de um ano escolar. Cada conta é gerada por gerarFase() —
-// mesma lógica das outras telas: os algarismos vêm soltos, um bloco por
-// dígito, e não há conta alvo exibida. A validação roda a cada movimentação
-// via contaEstaCorreta(), que aceita qualquer arranjo matematicamente válido.
+// Bloco de exercícios de um ano escolar, misturando tipos (soma, subtração,
+// multiplicação, divisão, contagem de emojis e a fase de dinheiro) conforme
+// o que cada ano permite (anosEscolares.js). Contas e contagem reaproveitam
+// o mesmo motor de arraste-e-alinha — algarismos/peças soltos, sem alvo à
+// vista, validados a cada movimentação — e só trocam gerador e validador.
+// A fase de dinheiro tem interação própria, então embute o componente
+// FaseDinheiro já existente no lugar desse motor.
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
@@ -11,9 +14,12 @@ import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
 import Peca, { TAMANHO_PECA } from './Peca';
 import PainelAparencia from './PainelAparencia';
+import FaseDinheiro from './FaseDinheiro';
 import { gerarFase } from '../utils/faseGenerator';
 import { contaEstaCorreta } from '../utils/validador';
-import { configDoAno, nomeAno, EXERCICIOS_POR_BLOCO } from '../utils/anosEscolares';
+import { gerarFaseContagem } from '../utils/contagemGenerator';
+import { contagemComOperadorEstaCorreta, contagemSimplesEstaCorreta } from '../utils/validadorContagem';
+import { configDoAno, nomeAno, sortearTipoExercicio, EXERCICIOS_POR_BLOCO } from '../utils/anosEscolares';
 import { registrarTempo } from '../utils/estatisticas';
 import { useAparencia } from '../contexto/AparenciaContext';
 
@@ -52,16 +58,35 @@ function formatarTempo(segundosTotais) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function criarFase(config, area, ladoPeca) {
-  const { pecas, sequenciaCorreta, operacao, maxDigitos } = gerarFase(config);
+// Gera o conteúdo (peças + dados de validação) de um exercício, dado seu tipo.
+// Contagem e aritmética compartilham a mesma UI de arraste-e-alinha, só mudam
+// o gerador de peças e o validador usado depois em verificar().
+function gerarConteudoExercicio(tipo, config) {
+  if (tipo === 'contagem') {
+    const c = gerarFaseContagem();
+    return {
+      pecas: c.pecas,
+      operacao: 'contagem',
+      maxDigitos: 1,
+      // dados que a validação de contagem precisa, além das peças —
+      // diferente da conta normal, aqui o arranjo tem que bater exatamente
+      // com a conta sorteada (ver contagemComOperadorEstaCorreta)
+      contagem: { operacaoContagem: c.operacao, a: c.a, b: c.b, resultado: c.resultado },
+    };
+  }
+  return gerarFase({ operacoes: [tipo], maxDigitos: config.maxDigitos });
+}
+
+function criarFase(tipo, config, area, ladoPeca) {
+  const conteudo = gerarConteudoExercicio(tipo, config);
   const posicoes = {};
   const usadas = [];
-  pecas.forEach((p) => {
+  conteudo.pecas.forEach((p) => {
     const pos = posicaoAleatoriaSemSobrepor(usadas, area.w || 320, area.h || 400, ladoPeca);
     usadas.push(pos);
     posicoes[p.id] = pos;
   });
-  return { pecas, sequenciaCorreta, posicoes, operacao, maxDigitos };
+  return { ...conteudo, posicoes };
 }
 
 export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar, onConcluido }) {
@@ -76,9 +101,18 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
   const config = configDoAno(ano, quantidadeMaxDigitos);
 
   const [indiceConta, setIndiceConta] = useState(0);
-  const [fase, setFase] = useState(() =>
-    criarFase(config, { w: janela.width, h: janela.height - 120 }, TAMANHO_PECA * escala)
-  );
+  // `tipoAtual`+`fase`+`emFaseDinheiro` nascem juntos do mesmo sorteio, então
+  // vivem num único state: dois useState separados não dá pra inicializar de
+  // forma consistente (o segundo não pode "ver" o tipo sorteado pelo primeiro
+  // sem sortear de novo). A fase de dinheiro não usa peças-em-fila — ela troca
+  // a tela inteira pelo componente FaseDinheiro, então `fase` fica null nesse caso.
+  const [slot, setSlot] = useState(() => {
+    const tipo = sortearTipoExercicio(config);
+    if (tipo === 'dinheiro') return { tipo, fase: null, emFaseDinheiro: true };
+    const areaInicial = { w: janela.width, h: janela.height - 120 };
+    return { tipo, fase: criarFase(tipo, config, areaInicial, TAMANHO_PECA * escala), emFaseDinheiro: false };
+  });
+  const { tipo: tipoAtual, fase, emFaseDinheiro } = slot;
   const [faseId, setFaseId] = useState(0);
   // trocado quando só as posições mudam (escala ou área nova), pra remontar as
   // peças sem reiniciar o cronômetro nem sortear outra conta
@@ -120,23 +154,23 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
   // escala em vigor pode não ser a que posicionou as peças. Rearranja a conta
   // atual com a medida correta para nenhuma peça nascer fora do palco.
   useEffect(() => {
-    if (resolvido) return;
-    setFase((atual) => {
+    if (resolvido || emFaseDinheiro) return;
+    setSlot((atual) => {
       const posicoes = {};
       const usadas = [];
-      atual.pecas.forEach((p) => {
+      atual.fase.pecas.forEach((p) => {
         const pos = posicaoAleatoriaSemSobrepor(usadas, areaJogo.w, areaJogo.h, ladoPeca);
         usadas.push(pos);
         posicoes[p.id] = pos;
       });
       posicoesAtuais.current = { ...posicoes };
-      return { ...atual, posicoes };
+      return { ...atual, fase: { ...atual.fase, posicoes } };
     });
     cancelarConfirmacao();
     setAlinhadas({});
     setLinhaGuiaY(null);
     setLayoutId((n) => n + 1);
-  }, [ladoPeca, areaJogo.w, areaJogo.h]);
+  }, [ladoPeca, areaJogo.w, areaJogo.h, emFaseDinheiro]);
 
   useEffect(
     () => () => {
@@ -164,15 +198,22 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
     timeoutConfirmacaoRef.current = setTimeout(finalizarConta, SEGUNDOS_CONFIRMACAO * 1000);
   }
 
-  function trocarFase(novaConfig, novoIndice) {
-    const nova = criarFase(novaConfig, areaJogo, ladoPeca);
-    posicoesAtuais.current = {};
-    nova.pecas.forEach((p) => {
-      posicoesAtuais.current[p.id] = { ...nova.posicoes[p.id] };
-    });
+  // Sorteia o tipo do próximo exercício do bloco (pode repetir o mesmo tipo
+  // ou cair num diferente — mistura os exercícios do ano sem sequência fixa).
+  function avancarSlot(novoIndice) {
+    const tipo = sortearTipoExercicio(config);
     cancelarConfirmacao();
-    setFase(nova);
-    setFaseId((n) => n + 1);
+    if (tipo === 'dinheiro') {
+      setSlot({ tipo, fase: null, emFaseDinheiro: true });
+    } else {
+      const nova = criarFase(tipo, config, areaJogo, ladoPeca);
+      posicoesAtuais.current = {};
+      nova.pecas.forEach((p) => {
+        posicoesAtuais.current[p.id] = { ...nova.posicoes[p.id] };
+      });
+      setSlot({ tipo, fase: nova, emFaseDinheiro: false });
+      setFaseId((n) => n + 1);
+    }
     setResolvido(false);
     setAlinhadas({});
     setLinhaGuiaY(null);
@@ -190,18 +231,35 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
     Speech.speak('Parabéns! A conta está correta!', { language: 'pt-BR', rate: 0.95 });
 
     const ehUltima = indiceConta >= EXERCICIOS_POR_BLOCO - 1;
-    registrarTempo(fase.operacao, fase.maxDigitos, tempo).then(() => {
+    const categoria = tipoAtual === 'contagem' ? 'contagem' : fase.operacao;
+    const nivel = tipoAtual === 'contagem' ? 1 : fase.maxDigitos;
+    registrarTempo(categoria, nivel, tempo).then(() => {
       if (ehUltima) {
         setBlocoConcluido(true);
         onConcluido && onConcluido();
         return;
       }
-      timeoutProximaRef.current = setTimeout(() => trocarFase(config, indiceConta + 1), 1500);
+      timeoutProximaRef.current = setTimeout(() => avancarSlot(indiceConta + 1), 1500);
     });
   }
 
+  // A fase de dinheiro registra o próprio tempo (FaseDinheiro chama
+  // registrarTempo('dinheiro', ...) internamente); aqui só decide se o bloco
+  // acabou ou se avança pro próximo exercício.
+  function aoConcluirDinheiro() {
+    const ehUltima = indiceConta >= EXERCICIOS_POR_BLOCO - 1;
+    if (ehUltima) {
+      setSlot((atual) => ({ ...atual, emFaseDinheiro: false }));
+      setResolvido(true);
+      setBlocoConcluido(true);
+      onConcluido && onConcluido();
+      return;
+    }
+    timeoutProximaRef.current = setTimeout(() => avancarSlot(indiceConta + 1), 1500);
+  }
+
   const verificar = useCallback(() => {
-    if (resolvido) return;
+    if (resolvido || !fase) return;
 
     const ids = fase.pecas.map((p) => p.id);
     const centros = ids.map((id) => {
@@ -240,7 +298,13 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
       }
 
       const pecasOrdenadas = ordenadas.map((c) => idParaPeca[c.id]);
-      acertouAgora = espacamentoOk && contaEstaCorreta(pecasOrdenadas);
+      if (espacamentoOk) {
+        acertouAgora = fase.contagem
+          ? fase.contagem.operacaoContagem === 'nenhuma'
+            ? contagemSimplesEstaCorreta(pecasOrdenadas, fase.contagem.resultado)
+            : contagemComOperadorEstaCorreta(pecasOrdenadas, fase.contagem)
+          : contaEstaCorreta(pecasOrdenadas);
+      }
     }
 
     if (acertouAgora) {
@@ -265,6 +329,22 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
     maxY: Math.max(0, areaJogo.h - ladoPeca),
   };
 
+  // A fase de dinheiro tem interação própria (arrastar cédulas pra somar um
+  // valor-alvo, não alinhar peças em fila), então quando sorteada ela troca a
+  // tela inteira pelo componente já existente em vez de tentar encaixá-la no
+  // motor de arraste-e-alinha das contas/contagem.
+  if (emFaseDinheiro) {
+    return (
+      <FaseDinheiro
+        onVoltar={onVoltar}
+        onConcluida={aoConcluirDinheiro}
+        valorMin={config.dinheiro?.min}
+        valorMax={config.dinheiro?.max}
+        progresso={`${nomeAno(ano)} · ${Math.min(indiceConta + 1, EXERCICIOS_POR_BLOCO)} de ${EXERCICIOS_POR_BLOCO}`}
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: coresInterface.fundoTela }]}>
       <StatusBar style="dark" />
@@ -281,7 +361,7 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
           <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
         </View>
-        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => trocarFase(config)}>
+        <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => avancarSlot()}>
           <Text style={styles.botaoIconeTexto}>↺</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
@@ -297,7 +377,7 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
       >
         {linhaGuiaY !== null && <View style={[styles.linhaGuia, { top: linhaGuiaY }]} />}
 
-        {fase.pecas.map((p) => (
+        {fase && fase.pecas.map((p) => (
           <Peca
             key={`${faseId}-${layoutId}-${p.id}`}
             id={p.id}

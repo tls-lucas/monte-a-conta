@@ -64,7 +64,7 @@ function posicaoNaBandeja(existentes, areaW, areaH) {
   return tentativa;
 }
 
-export default function FaseDinheiro({ onVoltar, onConcluida }) {
+export default function FaseDinheiro({ onVoltar, onConcluida, valorMin, valorMax, progresso }) {
   const { palco: coresPalco, interface: coresInterface } = useAparencia();
   const [areaPalco, setAreaPalco] = useState({ w: 0, h: 0 });
   const [pecas, setPecas] = useState([]);
@@ -86,7 +86,7 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
     setDentroArea({});
     setValorAtual(0);
     setConcluida(false);
-    setValorAlvo(gerarValorAlvo());
+    setValorAlvo(gerarValorAlvo(valorMin, valorMax));
     setSegundos(0);
     setRodada((r) => r + 1);
   }
@@ -182,7 +182,9 @@ export default function FaseDinheiro({ onVoltar, onConcluida }) {
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
           <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>💰 Monte o valor</Text>
-          <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Some cédulas até bater o valor-alvo</Text>
+          <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>
+            Some cédulas até bater o valor-alvo{progresso ? ` · ${progresso}` : ''}
+          </Text>
         </View>
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
           <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>

@@ -18,10 +18,12 @@ function notaAleatoria() {
 }
 
 /**
- * Sorteia um valor-alvo dentro da faixa [VALOR_MINIMO, VALOR_MAXIMO].
+ * Sorteia um valor-alvo dentro da faixa [min, max] (padrão: a faixa geral do
+ * jogo). Usado também pelos blocos por ano pra pedir valores "baixos" ou
+ * "altos" conforme a série, sem duplicar a lógica de sorteio de notas.
  * @returns {number}
  */
-export function gerarValorAlvo() {
+export function gerarValorAlvo(min = VALOR_MINIMO, max = VALOR_MAXIMO) {
   let soma = 0;
   let tentativas = 0;
   do {
@@ -29,6 +31,6 @@ export function gerarValorAlvo() {
     soma = 0;
     for (let i = 0; i < qtd; i++) soma += notaAleatoria();
     tentativas++;
-  } while ((soma < VALOR_MINIMO || soma > VALOR_MAXIMO) && tentativas < 50);
+  } while ((soma < min || soma > max) && tentativas < 50);
   return soma;
 }
