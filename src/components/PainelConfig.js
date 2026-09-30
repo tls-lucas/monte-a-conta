@@ -1,5 +1,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import RotuloIcone from './RotuloIcone';
 import { useAparencia } from '../contexto/AparenciaContext';
 import { OPERACOES_DISPONIVEIS } from '../utils/faseGenerator';
 
@@ -26,7 +28,8 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
     <Modal visible={visivel} transparent animationType="slide" onRequestClose={onFechar}>
       <Pressable style={styles.fundo} onPress={onFechar}>
         <Pressable style={[styles.painel, { backgroundColor: coresInterface.fundoTela }]} onPress={(e) => e.stopPropagation()}>
-          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>⚙️ Configurar fase</Text>
+          <RotuloIcone nome="cog" texto="Configurar fase" cor={coresInterface.textoPrincipal} tamanho={20}
+            estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} style={styles.tituloLinha} />
 
           <Text style={[styles.secao, { color: coresInterface.textoSecundario }]}>Operações permitidas</Text>
           <View style={styles.linhaChips}>
@@ -62,7 +65,7 @@ export default function PainelConfig({ visivel, config, onMudarConfig, onFechar,
           </View>
 
           <TouchableOpacity style={styles.botaoPrincipal} onPress={onGerarNovaFase}>
-            <Text style={styles.botaoPrincipalTexto}>🔁 Gerar nova fase</Text>
+            <RotuloIcone nome="refresh" texto="Gerar nova fase" cor="#fff" estiloTexto={styles.botaoPrincipalTexto} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.botaoSecundario} onPress={onFechar}>

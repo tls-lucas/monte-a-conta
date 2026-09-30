@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Peca, { TAMANHO_PECA } from './src/components/Peca';
+import RotuloIcone from './src/components/RotuloIcone';
 import PainelConfig from './src/components/PainelConfig';
 import PainelEstatisticas from './src/components/PainelEstatisticas';
 import TrilhaConta from './src/components/TrilhaConta';
@@ -302,14 +304,15 @@ function AppInterno() {
         <StatusBar style="dark" />
         <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧩 Monte a conta</Text>
+            <RotuloIcone nome="puzzle" texto="Monte a conta" cor={coresInterface.textoPrincipal} tamanho={22}
+              estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} />
             <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Escolha uma fase pra jogar</Text>
           </View>
           <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelEstatisticasAberto(true)}>
-            <Text style={styles.botaoIconeTexto}>📊</Text>
+            <MaterialCommunityIcons name="chart-bar" size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
-            <Text style={styles.botaoIconeTexto}>🎨</Text>
+            <MaterialCommunityIcons name="palette" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
 
@@ -323,11 +326,11 @@ function AppInterno() {
         <View style={styles.espacoFilho} />
 
         <TouchableOpacity style={[styles.botaoFaseDinheiro, { backgroundColor: cores.numero }]} onPress={() => setTela('dinheiro')}>
-          <Text style={styles.botaoFaseDinheiroTexto}>💰 Fase de dinheiro</Text>
+          <RotuloIcone nome="cash-multiple" texto="Fase de dinheiro" cor="#fff" estiloTexto={styles.botaoFaseDinheiroTexto} />
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.botaoFaseContagem, { backgroundColor: cores.operador }]} onPress={() => setTela('contagem')}>
-          <Text style={styles.botaoFaseDinheiroTexto}>🔢 Fase de contagem</Text>
+          <RotuloIcone nome="numeric" texto="Fase de contagem" cor="#fff" estiloTexto={styles.botaoFaseDinheiroTexto} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -337,7 +340,7 @@ function AppInterno() {
             setTela('jogo');
           }}
         >
-          <Text style={styles.botaoFaseDinheiroTexto}>🧩 Fase livre</Text>
+          <RotuloIcone nome="puzzle" texto="Fase livre" cor="#fff" estiloTexto={styles.botaoFaseDinheiroTexto} />
         </TouchableOpacity>
 
         <PainelAparencia
@@ -363,26 +366,28 @@ function AppInterno() {
       <StatusBar style="dark" />
       <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setTela('menu')}>
-          <Text style={styles.botaoIconeTexto}>🗺️</Text>
+          <MaterialCommunityIcons name="map" size={20} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧩 Monte a conta</Text>
+          <RotuloIcone nome="puzzle" texto="Monte a conta" cor={coresInterface.textoPrincipal} tamanho={20}
+            estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} />
           <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>Arraste os blocos e alinhe a conta em fila</Text>
         </View>
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
-          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
+          <RotuloIcone nome="timer-outline" texto={formatarTempo(segundos)} cor={coresInterface.textoPrincipal} tamanho={15}
+            estiloTexto={[styles.timerTexto, { color: coresInterface.textoPrincipal }]} style={styles.timerLinha} />
         </View>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelEstatisticasAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>📊</Text>
+          <MaterialCommunityIcons name="chart-bar" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>⚙️</Text>
+          <MaterialCommunityIcons name="cog" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={reiniciarPosicoes}>
-          <Text style={styles.botaoIconeTexto}>↺</Text>
+          <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaJogoAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>🎨</Text>
+          <MaterialCommunityIcons name="palette" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -428,7 +433,8 @@ function AppInterno() {
 
         {resolvido && (
           <View style={styles.mensagemBox} pointerEvents="box-none">
-            <Text style={styles.mensagem}>🎉 Parabéns! Conta certa!</Text>
+            <RotuloIcone nome="party-popper" texto="Parabéns! Conta certa!" cor="#6fc270" tamanho={26}
+              estiloTexto={styles.mensagem} />
             <Text style={[styles.mensagemTempo, { color: coresPalco.textoCaixa }]}>
               Seu tempo: {formatarTempo(tempoFinal ?? segundos)}
             </Text>
@@ -436,7 +442,7 @@ function AppInterno() {
               style={styles.botaoNovaFase}
               onPress={() => gerarNovaFaseComConfigAtual(config)}
             >
-              <Text style={styles.botaoNovaFaseTexto}>🔁 Gerar nova fase</Text>
+              <RotuloIcone nome="refresh" texto="Gerar nova fase" cor="#fff" estiloTexto={styles.botaoNovaFaseTexto} />
             </TouchableOpacity>
           </View>
         )}
@@ -589,6 +595,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  timerLinha: {
+    gap: 4,
   },
   espacoFilho: {
     flex: 1,

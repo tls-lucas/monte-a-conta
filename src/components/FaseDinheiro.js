@@ -11,7 +11,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Peca from './Peca';
+import RotuloIcone from './RotuloIcone';
 import PainelAparencia from './PainelAparencia';
 import { NOTAS_DISPONIVEIS, gerarValorAlvo } from '../utils/notasGenerator';
 import { registrarTempo } from '../utils/estatisticas';
@@ -178,19 +180,21 @@ export default function FaseDinheiro({ onVoltar, onConcluida, valorMin, valorMax
       <StatusBar style="dark" />
       <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onVoltar}>
-          <Text style={styles.botaoIconeTexto}>🗺️</Text>
+          <MaterialCommunityIcons name="map" size={20} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>💰 Monte o valor</Text>
+          <RotuloIcone nome="cash-multiple" texto="Monte o valor" cor={coresInterface.textoPrincipal} tamanho={22}
+            estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} />
           <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>
             Some cédulas até bater o valor-alvo{progresso ? ` · ${progresso}` : ''}
           </Text>
         </View>
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
-          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
+          <RotuloIcone nome="timer-outline" texto={formatarTempo(segundos)} cor={coresInterface.textoPrincipal} tamanho={16}
+            estiloTexto={[styles.timerTexto, { color: coresInterface.textoPrincipal }]} style={styles.timerLinha} />
         </View>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>🎨</Text>
+          <MaterialCommunityIcons name="palette" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -240,9 +244,9 @@ export default function FaseDinheiro({ onVoltar, onConcluida, valorMin, valorMax
 
         {concluida && (
           <View style={styles.mensagemBox} pointerEvents="box-none">
-            <Text style={styles.mensagem}>🎉 Valor certinho!</Text>
+            <RotuloIcone nome="party-popper" texto="Valor certinho!" cor="#6fc270" tamanho={20} estiloTexto={styles.mensagem} />
             <TouchableOpacity style={styles.botaoNovaFase} onPress={iniciarNovaFase}>
-              <Text style={styles.botaoNovaFaseTexto}>🔁 Gerar nova fase</Text>
+              <RotuloIcone nome="refresh" texto="Gerar nova fase" cor="#fff" estiloTexto={styles.botaoNovaFaseTexto} />
             </TouchableOpacity>
           </View>
         )}
@@ -291,6 +295,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   timerTexto: { fontSize: 16, fontWeight: 'bold', color: '#5b4636' },
+  timerLinha: { gap: 4 },
   botaoIcone: {
     backgroundColor: '#5b4636',
     borderRadius: 12,

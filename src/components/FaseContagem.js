@@ -11,7 +11,9 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Peca, { TAMANHO_PECA } from './Peca';
+import RotuloIcone from './RotuloIcone';
 import PainelAparencia from './PainelAparencia';
 import { gerarFaseContagem } from '../utils/contagemGenerator';
 import {
@@ -235,7 +237,7 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
       <StatusBar style="dark" />
       <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onVoltar}>
-          <Text style={styles.botaoIconeTexto}>🗺️</Text>
+          <MaterialCommunityIcons name="map" size={20} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
           <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>{fase.emoji} Contagem</Text>
@@ -244,13 +246,14 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
           </Text>
         </View>
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
-          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
+          <RotuloIcone nome="timer-outline" texto={formatarTempo(segundos)} cor={coresInterface.textoPrincipal} tamanho={16}
+            estiloTexto={[styles.timerTexto, { color: coresInterface.textoPrincipal }]} style={styles.timerLinha} />
         </View>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={gerarNovaFaseAgora}>
-          <Text style={styles.botaoIconeTexto}>↺</Text>
+          <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>🎨</Text>
+          <MaterialCommunityIcons name="palette" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -303,12 +306,12 @@ export default function FaseContagem({ onVoltar, onConcluida }) {
 
         {resolvido && (
           <View style={styles.mensagemBox} pointerEvents="box-none">
-            <Text style={styles.mensagem}>🎉 Contagem certa!</Text>
+            <RotuloIcone nome="party-popper" texto="Contagem certa!" cor="#6fc270" tamanho={20} estiloTexto={styles.mensagem} />
             <Text style={[styles.mensagemTempo, { color: coresPalco.textoCaixa }]}>
               Seu tempo: {formatarTempo(tempoFinal ?? segundos)}
             </Text>
             <TouchableOpacity style={styles.botaoNovaFase} onPress={gerarNovaFaseAgora}>
-              <Text style={styles.botaoNovaFaseTexto}>🔁 Gerar nova fase</Text>
+              <RotuloIcone nome="refresh" texto="Gerar nova fase" cor="#fff" estiloTexto={styles.botaoNovaFaseTexto} />
             </TouchableOpacity>
           </View>
         )}
@@ -341,6 +344,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   timerTexto: { fontSize: 16, fontWeight: 'bold', color: '#5b4636' },
+  timerLinha: { gap: 4 },
   botaoIcone: {
     marginLeft: 10,
     backgroundColor: '#5b4636',

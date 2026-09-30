@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Pressable, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import RotuloIcone from './RotuloIcone';
 import { useAparencia } from '../contexto/AparenciaContext';
 import { OPERACOES_DISPONIVEIS } from '../utils/faseGenerator';
 import { NIVEIS_LISTA, MODOS_LISTA } from '../utils/estatisticas';
@@ -56,7 +58,8 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
     <Modal visible={visivel} transparent animationType="slide" onRequestClose={onFechar}>
       <Pressable style={styles.fundo} onPress={onFechar}>
         <Pressable style={[styles.painel, { backgroundColor: coresInterface.fundoTela }]} onPress={(e) => e.stopPropagation()}>
-          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>📊 Estatísticas (tempo médio)</Text>
+          <RotuloIcone nome="chart-bar" texto="Estatísticas (tempo médio)" cor={coresInterface.textoPrincipal} tamanho={20}
+            estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} style={styles.tituloLinha} />
 
           <ScrollView style={{ maxHeight: 420 }}>
             {OPERACOES_DISPONIVEIS.map((op) => {
@@ -94,9 +97,13 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
               const dados = resumo?.porModo?.[modo.chave];
               return (
                 <View key={modo.chave} style={[styles.linhaModo, { backgroundColor: coresInterface.fundoCaixa }]}>
-                  <Text style={[styles.nomeModo, { color: coresInterface.textoPrincipal }]}>
-                    {modo.icone} {modo.rotulo}
-                  </Text>
+                  <RotuloIcone
+                    nome={modo.icone}
+                    texto={modo.rotulo}
+                    cor={coresInterface.textoPrincipal}
+                    tamanho={16}
+                    estiloTexto={[styles.nomeModo, { color: coresInterface.textoPrincipal }]}
+                  />
                   <Text style={styles.mediaGeral}>
                     {formatarTempo(dados?.media)}{' '}
                     <Text style={[styles.quantidade, { color: coresInterface.textoSecundario }]}>({dados?.quantidade || 0})</Text>
@@ -106,7 +113,8 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
             })}
 
             <View style={[styles.areaEnvio, { backgroundColor: coresInterface.fundoCaixa }]}>
-              <Text style={[styles.tituloEnvio, { color: coresInterface.textoPrincipal }]}>📧 Enviar relatório em PDF</Text>
+              <RotuloIcone nome="email-outline" texto="Enviar relatório em PDF" cor={coresInterface.textoPrincipal} tamanho={17}
+                estiloTexto={[styles.tituloEnvio, { color: coresInterface.textoPrincipal }]} style={styles.tituloEnvioLinha} />
               <Text style={[styles.descricaoEnvio, { color: coresInterface.textoSecundario }]}>
                 Digite o e-mail do destinatário. O último endereço usado fica salvo neste dispositivo.
               </Text>
@@ -132,7 +140,7 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
                     <Text style={styles.botaoEnviarTexto}> Enviando...</Text>
                   </View>
                 ) : (
-                  <Text style={styles.botaoEnviarTexto}>📨 Enviar relatório PDF</Text>
+                  <RotuloIcone nome="send" texto="Enviar relatório PDF" cor="#fff" tamanho={16} estiloTexto={styles.botaoEnviarTexto} />
                 )}
               </TouchableOpacity>
             </View>
@@ -154,7 +162,9 @@ export default function PainelEstatisticas({ visivel, resumo, onFechar, onLimpar
 const styles = StyleSheet.create({
   fundo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   painel: { backgroundColor: '#fdf6ec', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 22, paddingBottom: 34 },
-  titulo: { fontSize: 20, fontWeight: 'bold', color: '#5b4636', marginBottom: 14, textAlign: 'center' },
+  titulo: { fontSize: 20, fontWeight: 'bold', color: '#5b4636' },
+  tituloLinha: { justifyContent: 'center', marginBottom: 14 },
+  tituloEnvioLinha: { marginBottom: 5 },
   blocoOperacao: { backgroundColor: '#fff', borderRadius: 14, padding: 12, marginBottom: 10 },
   linhaGeral: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   nomeOperacao: { fontSize: 15, fontWeight: 'bold', color: '#5b4636' },

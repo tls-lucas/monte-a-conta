@@ -12,7 +12,9 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
 import * as Speech from 'expo-speech';
 import { StatusBar } from 'expo-status-bar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Peca, { TAMANHO_PECA } from './Peca';
+import RotuloIcone from './RotuloIcone';
 import PainelAparencia from './PainelAparencia';
 import FaseDinheiro from './FaseDinheiro';
 import { gerarFase } from '../utils/faseGenerator';
@@ -350,22 +352,24 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
       <StatusBar style="dark" />
       <View style={[styles.cabecalho, { backgroundColor: coresInterface.fundoTela }]}>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={onVoltar}>
-          <Text style={styles.botaoIconeTexto}>🗺️</Text>
+          <MaterialCommunityIcons name="map" size={20} color="#fff" />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧮 {nomeAno(ano)}</Text>
+          <RotuloIcone nome="abacus" texto={nomeAno(ano)} cor={coresInterface.textoPrincipal} tamanho={18}
+            estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} />
           <Text style={[styles.subtitulo, { color: coresInterface.textoSecundario }]}>
             Conta {Math.min(indiceConta + 1, EXERCICIOS_POR_BLOCO)} de {EXERCICIOS_POR_BLOCO} · alinhe os blocos em fila
           </Text>
         </View>
         <View style={[styles.timerBox, { backgroundColor: coresInterface.timerBoxFundo }]}>
-          <Text style={[styles.timerTexto, { color: coresInterface.textoPrincipal }]}>⏱ {formatarTempo(segundos)}</Text>
+          <RotuloIcone nome="timer-outline" texto={formatarTempo(segundos)} cor={coresInterface.textoPrincipal} tamanho={14}
+            estiloTexto={[styles.timerTexto, { color: coresInterface.textoPrincipal }]} style={styles.timerLinha} />
         </View>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => avancarSlot()}>
-          <Text style={styles.botaoIconeTexto}>↺</Text>
+          <MaterialCommunityIcons name="refresh" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.botaoIcone, { backgroundColor: coresInterface.botaoIconeFundo }]} onPress={() => setPainelAparenciaAberto(true)}>
-          <Text style={styles.botaoIconeTexto}>🎨</Text>
+          <MaterialCommunityIcons name="palette" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -403,7 +407,12 @@ export default function BlocoExerciciosAno({ ano, quantidadeMaxDigitos, onVoltar
 
         {resolvido && (
           <View style={styles.mensagemBox} pointerEvents="box-none">
-            <Text style={styles.mensagem}>{blocoConcluido ? '🏆 Bloco completo!' : '🎉 Conta certa!'}</Text>
+            <RotuloIcone
+              nome={blocoConcluido ? 'trophy' : 'party-popper'}
+              texto={blocoConcluido ? 'Bloco completo!' : 'Conta certa!'}
+              tamanho={26}
+              estiloTexto={styles.mensagem}
+            />
             <Text style={[styles.mensagemTempo, { color: coresPalco.textoCaixa }]}>
               Seu tempo: {formatarTempo(tempoFinal ?? segundos)}
             </Text>
@@ -446,6 +455,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   timerTexto: { fontSize: 14, fontWeight: 'bold' },
+  timerLinha: { gap: 4 },
   palco: {
     flex: 1,
     position: 'relative',

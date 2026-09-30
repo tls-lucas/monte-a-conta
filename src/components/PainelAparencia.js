@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAparencia, ESQUEMAS_CORES } from '../contexto/AparenciaContext';
 import ColorPicker from './ColorPicker';
 import TamanhoSlider from './TamanhoSlider';
 import PaletaPreview from './PaletaPreview';
 
 const OPCOES_TEMA = [
-  { chave: 'claro', rotulo: '☀️ Claro' },
-  { chave: 'escuro', rotulo: '🌙 Escuro' },
+  { chave: 'claro', rotulo: 'Claro', icone: 'white-balance-sunny' },
+  { chave: 'escuro', rotulo: 'Escuro', icone: 'moon-waning-crescent' },
 ];
 
 // OPCOES_TAMANHO removidas — agora usa slider contínuo
@@ -53,6 +54,13 @@ function LinhaOpcoes({ titulo, opcoes, valorAtual, aoEscolher, coresInterface, m
               onPress={() => aoEscolher(op.chave)}
             >
               <View style={styles.opcaoConteudo}>
+                {op.icone && (
+                  <MaterialCommunityIcons
+                    name={op.icone}
+                    size={15}
+                    color={selecionado ? '#fff' : coresInterface.textoPrincipal}
+                  />
+                )}
                 <Text style={[styles.opcaoTexto, selecionado && styles.opcaoTextoSelecionado, { color: selecionado ? '#fff' : coresInterface.textoPrincipal }]}>
                   {op.rotulo}
                 </Text>
@@ -88,9 +96,12 @@ export default function PainelAparencia({ visivel, onFechar }) {
       <View style={styles.fundo}>
         <View style={[styles.cartao, { backgroundColor: coresInterface.fundoTela }]}>
           <View style={styles.cabecalho}>
-            <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🎨 Aparência</Text>
+            <View style={styles.tituloLinha}>
+              <MaterialCommunityIcons name="palette" size={20} color={coresInterface.textoPrincipal} />
+              <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>Aparência</Text>
+            </View>
             <TouchableOpacity onPress={onFechar}>
-              <Text style={[styles.fechar, { color: coresInterface.textoSecundario }]}>✕</Text>
+              <MaterialCommunityIcons name="close" size={20} color={coresInterface.textoSecundario} style={styles.fechar} />
             </TouchableOpacity>
           </View>
 
@@ -188,6 +199,7 @@ const styles = StyleSheet.create({
   },
   titulo: { fontSize: 20, fontWeight: 'bold', color: '#5b4636' },
   fechar: { fontSize: 20, color: '#8a7a66', paddingHorizontal: 6 },
+  tituloLinha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   secao: { marginBottom: 20 },
   secaoTitulo: { fontSize: 14, fontWeight: '700', color: '#8a7a66', marginBottom: 8 },
   opcoesLinha: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

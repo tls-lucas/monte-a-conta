@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import RotuloIcone from './RotuloIcone';
 import { useAparencia, misturarCores } from '../contexto/AparenciaContext';
 import { ANOS } from '../utils/anosEscolares';
 
@@ -19,7 +20,8 @@ export default function TrilhaConta({ onSelecionarAno }) {
 
   return (
     <View style={styles.trilha}>
-      <Text style={[styles.titulo, { color: coresInterface.textoPrincipal }]}>🧮 Conta Aritmética</Text>
+      <RotuloIcone nome="abacus" texto="Conta Aritmética" cor={coresInterface.textoPrincipal} tamanho={16}
+        estiloTexto={[styles.titulo, { color: coresInterface.textoPrincipal }]} style={styles.tituloLinha} />
       <View style={styles.lista}>
         {ANOS.map((item, index) => (
           <TouchableOpacity
@@ -46,8 +48,8 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 14,
     fontWeight: '700',
-    marginBottom: 10,
   },
+  tituloLinha: { marginBottom: 10 },
   lista: {
     gap: 6,
   },

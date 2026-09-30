@@ -16,8 +16,8 @@ export const NIVEIS_LISTA = [1, 2, 3, 4, 5, 6];
 export const NIVEL_UNICO = 1;
 
 export const MODOS_LISTA = [
-  { chave: 'dinheiro', rotulo: 'Fase de dinheiro', icone: '💰' },
-  { chave: 'contagem', rotulo: 'Fase de contagem', icone: '🔢' },
+  { chave: 'dinheiro', rotulo: 'Fase de dinheiro', icone: 'cash-multiple' },
+  { chave: 'contagem', rotulo: 'Fase de contagem', icone: 'numeric' },
 ];
 
 function categoriaVazia() {
